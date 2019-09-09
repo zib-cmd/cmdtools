@@ -1,3 +1,3 @@
 # pccap
 
-python implementation of pcca+
+python implementation of pcca+.
