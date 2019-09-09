@@ -23,14 +23,8 @@ def find_Q_red(matrix, Xmatrix, noofclus):
     Lambda_sec=np.matmul(np.matmul(pinvX,matrix),Xmatrix)
     
     #4
-<<<<<<< HEAD
-    A=optimizeMetastab(Xmatrix,noofclus)
-    Q_red=np.matmul(np.matmul(np.linalg.inv(A),Lambda_sec),A)
-    return(Q_red)
-=======
     Chi=optimizeMetastab(Xmatrix,noofclus)
     Q_red=np.matmul(np.matmul(np.linalg.pinv(Chi),Lambda_sec),Chi)
     return(Q_red)
     
     #%%
->>>>>>> origin/renata
