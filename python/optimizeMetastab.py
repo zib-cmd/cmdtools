@@ -52,9 +52,3 @@ def optimizeMetastab(X,n):
 #plt.imshow(chiis, aspect="auto")
 #plt.colorbar()
 ##%%
-matrixB=np.reshape(np.random.uniform(0.,1.,100), (10,10))
-for i in range(10):
-    matrixB[i,:]=matrixB[:,i]/np.sum(matrixB[:,i])
-eigwB,eigB=linalg.schur(matrixB)
-#%%
-newevs_B=orthogon(eigB, np. ones(10), np.diag(eigwB), 3, 1.)
