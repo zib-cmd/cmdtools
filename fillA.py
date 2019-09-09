@@ -35,6 +35,8 @@ def fillA(A,EVS,N,k):
     N: int, no of cells
     Output:
         newf filled A, 2D array"""
+    k=int(k)
+    N=int(N)
     A[1:k,0]=-np.sum(A[1:k,1:k],1)
     for j in range(k):
         A[0,j]=-np.matmul(EVS[0,1:k],A[1:k,j])
@@ -45,14 +47,14 @@ def fillA(A,EVS,N,k):
     return(A/np.sum(A[0,:]))
     
     #%%
-AA=np.random.uniform(0,1,100)
-AA=np.reshape(AA,(10,10))
-#%%
-for i in range(10):
-    AA[i,:]=AA[i,:]/np.sum(AA[i,:])
-    
-#%%
-ews, evs=schur(AA, output="real")
-#%%
-fil=fillA(AA,evs,10,3)
+#AA=np.random.uniform(0,1,100)
+#AA=np.reshape(AA,(10,10))
+##%%
+#for i in range(10):
+#    AA[i,:]=AA[i,:]/np.sum(AA[i,:])
+#    
+##%%
+#ews, evs=schur(AA, output="real")
+##%%
+#fil=fillA(AA,evs,10,3)
 #%%

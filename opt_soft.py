@@ -30,7 +30,7 @@ def opt_soft(evs,Ndim,kdim):
     global ITERMAX
     ITERMAX=500
     N=Ndim
-    k=kdim
+    k=int(kdim)
     flag=1
     if k>1:
         index=np.zeros(k)
@@ -78,4 +78,4 @@ def opt_soft(evs,Ndim,kdim):
         else:
             fret=-1.0
         chi=np.ones(N)
-    return (chi,fret)
+    return (chi,A,fret)

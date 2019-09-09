@@ -58,8 +58,11 @@ def indexsearch(EVS,N,k):
         k: no of clusters
     Output:
         index: 1D array"""
+        
+    N=int(N)
+    k=int(k)
     maxdist=0.0
-    OrthoSys=np.zeros((N,N))
+
     temp=np.zeros((N))
     index=np.zeros(k)
     OrthoSys=copy.deepcopy(EVS)
@@ -75,11 +78,12 @@ def indexsearch(EVS,N,k):
         temp=copy.deepcopy(OrthoSys[int(index[j-1]),:])
         
         for l in range(N):
-            sclprod=copy.deepcopy(np.matmul(OrthoSys[l,:],np.transpose(temp)))
+            sclprod=copy.deepcopy(np.dot(OrthoSys[l,:],temp))
             OrthoSys[l,:]=copy.deepcopy(OrthoSys[l,:]-sclprod*temp)
             dist2=np.linalg.norm(OrthoSys[l,:])
             if dist2>maxdist:
                 maxdist=dist2
                 index[j]=l
         OrthoSys=OrthoSys/maxdist
+ #   plt.imshow(OrthoSys)
     return(index)

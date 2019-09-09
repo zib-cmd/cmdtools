@@ -42,7 +42,7 @@ def objective(alpha,X,N,k,A):
     
     global NORMA
     global OPT
-    
+    k=int(k)
     for i in range(k-1):
         for j in range(k-1):
             A[i+1,j+1]=alpha[j+(i-1)*(k-1)]
