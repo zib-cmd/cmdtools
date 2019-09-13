@@ -9,14 +9,20 @@ def test_random():
     assert utils.isstochastic(m)
 
 
-def test_example():
+def test_example2():
     T = utils.example_metastab4()
     m = pcca.pcca(T, 2)
-    expected = [[1, 0],
-                [.5, .5],
-                [0, 1],
-                [0, 1]]
-    assert np.isclose(utils.order_membership(m), expected).all()
+    m = utils.order_membership(m)
+    expected = [[1, 0], [.5, .5], [0, 1], [0, 1]]
+    assert np.isclose(m, expected).all()
+
+def test_example3():
+    T = utils.example_metastab4()
+    m = pcca.pcca(T, 3)
+    m = utils.order_membership(m)
+    expected = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 1]]
+    assert np.isclose(m, expected).all()
+
 
 
 def test_schurvects():
