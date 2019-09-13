@@ -1,2 +1,9 @@
 # ignore compiled pythonfiles
 *.pyc
+
+# pytest cache files
+.pytest_cache
+
+# vscode ide files
+.vscode
+*.code-workspace
