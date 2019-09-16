@@ -5,8 +5,10 @@ def randompropagator(n, reversible=True):
     T = np.random.rand(n, n)
     if reversible:
         T = (T + T.T)
-    T /= T.sum(axis=1)[:, None]  # rownormalize
-    return T
+    return rowstochastic(T)
+
+def rowstochastic(T):
+    return T /  T.sum(axis=1)[:, None]
 
 
 def example_metastab4():
@@ -17,8 +19,9 @@ def example_metastab4():
     return T
 
 
-def isstochastic(P):
-    return np.isclose(P.sum(axis=1), 1).all()
+def is_rowstochastic(P):
+    return np.isclose(P.sum(axis=1), 1).all() and \
+        (P >= -1e-12).all()
 
 
 def order_membership(m):
