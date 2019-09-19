@@ -24,10 +24,10 @@ def schurvects(T, n, massmatrix=None):
 
     # schur decomposition
     if massmatrix is None:
-        _, X, _ = schur(T, sort=lambda x: x > cutoff)
+        _, X, _ = schur(T, sort=lambda x: np.real(x) > cutoff)
     else:
         _, _, _, _, _, X = \
-            ordqz(T, massmatrix, sort=lambda a,b: a/b > cutoff)
+            ordqz(T, massmatrix, sort=lambda a,b: np.real(a/b) > cutoff)
 
     X = X[:, 0:n]  # use only first n vectors
 
