@@ -25,8 +25,17 @@ def test_example_n3():
     assert np.isclose(m, expected).all()
 
 
-def test_schurvects():
-    T = utils.randompropagator(10)
-    X = pcca.schurvects(T, 4)
+def test_schurvects(n=10, m=4):
+    T = utils.randompropagator(n)
+    X = pcca.schurvects(T, m)
     # first eigenvector is 1
     assert (X[:, 0] == 1).all()
+
+
+def test_schurvects_generalized(n=10, m=3):
+    T = utils.randompropagator(n)
+    X1 = pcca.schurvects(T, m)
+    X2 = pcca.schurvects(T, m, massmatrix=np.diag(np.ones(n)))
+
+    # check if X1 and X2 span the same space
+    assert np.linalg.matrix_rank(np.hstack([X1, X2])) == m
