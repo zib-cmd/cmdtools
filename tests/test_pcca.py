@@ -1,5 +1,5 @@
-from pccap import utils
-from pccap.analysis import pcca
+from cmdtools import utils
+from cmdtools.analysis import pcca
 import numpy as np
 
 

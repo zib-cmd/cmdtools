@@ -1,6 +1,6 @@
 from numpy.random import rand
-from pccap import utils
-from pccap.estimation import galerkin
+from cmdtools import utils
+from cmdtools.estimation import galerkin
 
 def test_propagator():
     x = rand(10,3)
