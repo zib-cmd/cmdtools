@@ -15,12 +15,15 @@ def pcca(T, n):
 def schurvects(T, n, massmatrix=None):
     e = np.sort(np.linalg.eigvals(T))
 
+    v_in  = np.real(e[-n])
+    v_out = np.real(e[-(n+1)])
+
     # do not seperate conjugate eigenvalues
-    assert not np.isclose(np.real(e[-n]), np.real(e[-(n+1)])), \
+    assert not np.isclose(v_in, v_out), \
         "Cannot seperate conjugate eigenvalues, choose another n"
 
     # determine the eigenvalue gap
-    cutoff = (e[-n] + e[-(n + 1)]) / 2
+    cutoff = (v_in + v_out) / 2
 
     # schur decomposition
     if massmatrix is None:
