@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.linalg import schur, ordqz
-from optimization import inner_simplex_algorithm, optimize
+from .optimization import inner_simplex_algorithm, optimize
 
 
 def pcca(T, n):

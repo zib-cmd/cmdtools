@@ -7,3 +7,5 @@
 # vscode ide files
 .vscode
 *.code-workspace
+
+.DS_Store

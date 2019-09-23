@@ -1,4 +1,4 @@
-import sqra
+from pccap.estimation import sqra
 import numpy as np
 
 
