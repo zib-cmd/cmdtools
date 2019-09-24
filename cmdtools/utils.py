@@ -7,8 +7,9 @@ def randompropagator(n, reversible=True):
         T = (T + T.T)
     return rowstochastic(T)
 
+
 def rowstochastic(T):
-    return T /  T.sum(axis=1)[:, None]
+    return T / T.sum(axis=1)[:, None]
 
 
 def example_metastab4():

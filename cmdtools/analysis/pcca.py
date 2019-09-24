@@ -16,7 +16,7 @@ def schurvects(T, n, massmatrix=None):
     e = np.sort(np.linalg.eigvals(T))
 
     v_in  = np.real(e[-n])
-    v_out = np.real(e[-(n+1)])
+    v_out = np.real(e[-(n + 1)])
 
     # do not seperate conjugate eigenvalues
     assert not np.isclose(v_in, v_out), \
@@ -30,7 +30,7 @@ def schurvects(T, n, massmatrix=None):
         _, X, _ = schur(T, sort=lambda x: np.real(x) > cutoff)
     else:
         _, _, _, _, _, X = \
-            ordqz(T, massmatrix, sort=lambda a,b: np.real(a/b) > cutoff)
+            ordqz(T, massmatrix, sort=lambda a, b: np.real(a / b) > cutoff)
 
     X = X[:, 0:n]  # use only first n vectors
 
