@@ -2,21 +2,18 @@ image: "python:3.7"
 
 before_script:
   - python --version
-  - pip install -r requirements.txt
-  
+
 stages:
+  - Lint
   - Test
 
 flake8:
-  stage: Test
+  stage: Lint
   allow_failure: true
   script:
-  - flake8 --max-line-length=120
+  - flake8
   
 pytest:
   stage: Test
   script:
-  - pytest --cov --junitxml=junit.xml
-  artifacts:
-    reports:
-      junit: junit.xml
+  - tox
