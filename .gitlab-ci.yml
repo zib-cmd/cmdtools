@@ -2,6 +2,8 @@ image: "python:3.7"
 
 before_script:
   - python --version
+  - pip install flake8
+  - pip install tox
 
 stages:
   - Lint
