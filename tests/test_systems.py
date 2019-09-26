@@ -11,4 +11,6 @@ def test_doublewell():
 
 
 def test_threehole():
-    diffusion.ThreeHolePotential()
+    d = diffusion.ThreeHolePotential()
+    d.beta = 1.6
+    d.stationary_dist_nn([0, 0])
