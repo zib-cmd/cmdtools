@@ -7,8 +7,8 @@ def test_diffusion():
 
 
 def test_doublewell():
-    diffusion.DoubleWell()
-
+    d = diffusion.DoubleWell()
+    d.stationary_dist_nn(1)
 
 def test_threehole():
     d = diffusion.ThreeHolePotential()

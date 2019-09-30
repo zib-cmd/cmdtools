@@ -27,7 +27,9 @@ class DiffusionProcess:
 
 class DoubleWell(DiffusionProcess):
     def __init__(self):
-        DiffusionProcess.__init__(self, lambda x: (x**2 - 1)**2 / 4, beta_to_epsilon(1))
+        def potential(x):
+            return (x**2 - 1)**2 / 4
+        DiffusionProcess.__init__(self, potential, beta_to_epsilon(1))
 
     xmin = -2.5
     xmax = 2.5
