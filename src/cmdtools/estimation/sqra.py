@@ -7,5 +7,5 @@ def sqra(u, A, beta, phi):
 
     D  = np.diag(pi)
     D1 = np.diag(1 / pi)
-    Q  = phi * D1 @ A @ D
+    Q  = phi * D1.dot(A).dot(D)
     return Q

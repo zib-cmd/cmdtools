@@ -9,7 +9,7 @@ def propagator(timeseries, centers, sigma):
     Uses the galerkin projection onto Gaussian ansatz functions
     with bandwidth `sigma` around the given `centers`. """
     m = get_membership(timeseries, centers, sigma)
-    counts = m[0:-1, :].T @ m[1:, :]
+    counts = m[0:-1, :].T.dot(m[1:, :])
     return utils.rowstochastic(counts)
 
 

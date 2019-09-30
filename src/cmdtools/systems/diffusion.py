@@ -27,7 +27,7 @@ class DiffusionProcess:
 
 class DoubleWell(DiffusionProcess):
     def __init__(self):
-        super().__init__(lambda x: (x**2 - 1)**2 / 4, beta_to_epsilon(1))
+        DiffusionProcess.__init__(self, lambda x: (x**2 - 1)**2 / 4, beta_to_epsilon(1))
 
     xmin = -2.5
     xmax = 2.5
@@ -47,7 +47,7 @@ class ThreeHolePotential(DiffusionProcess):
                 - 5 * np.exp(-(x+1)**2 - y**2) \
                 + .2 * x**4 + .2 * (y-1/3)**4
 
-        super().__init__(potential, beta_to_epsilon(1.67))
+        DiffusionProcess.__init__(self, potential, beta_to_epsilon(1.67))
 
     dimension = 2
     xmin = -2

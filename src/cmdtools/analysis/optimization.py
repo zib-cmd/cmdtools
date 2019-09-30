@@ -26,7 +26,7 @@ def indexsearch(X):
             # remove subspace of this row
             X /= rownorm[ind[j]]
             v  = X[ind[j], :]
-            X -= np.outer(X @ v, v)
+            X -= np.outer(X.dot(v), v)
 
     return ind
 
@@ -51,5 +51,5 @@ def objective(alpha, X, A):
 def fillA(A, X):
     """ Converts the given matrix into a feasible transformation matrix. """
     A[1:, 0] = -np.sum(A[1:, 1:], axis=1)  # row-sum condition
-    A[0, :]  = -np.min(X[:, 1:] @ A[1:, :], axis=0)  # maximality condition
+    A[0, :]  = -np.min(X[:, 1:].dot(A[1:, :]), axis=0)  # maximality condition
     A /= np.sum(A[0, :])  # rescale to feasible set
