@@ -21,6 +21,13 @@ class Trajectory:
         return propagator(self.membership)
 
 
+def lagged_propagator(m, lag):
+    p = np.zeros([m.shape[1], m.shape[1]])
+    for i in range(0,lag):
+        p += propagator(m[i::lag,:])
+    return p / lag
+
+
 def propagator(m):
     " given the membership of a trajectory to some basis functions, estimate the propagator "
     counts = m[0:-1, :].T.dot(m[1:, :])
