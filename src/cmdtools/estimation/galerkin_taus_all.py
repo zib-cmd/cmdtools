@@ -36,8 +36,9 @@ def propagator_tau(timeseries, centers, sigma, max_tau= 1):
     
     m = get_membership(timeseries, centers, sigma)
     
-    counts = np.zeros((max_tau, no_centers, no_centers))
+    counts = np.zeros((max_tau+1, no_centers, no_centers))
     
+    counts[0,:,:] = m.T.dot(m)
     for i in range(1,max_tau+1):
         
        sum_over = np.zeros((no_centers, no_centers))
@@ -48,10 +49,11 @@ def propagator_tau(timeseries, centers, sigma, max_tau= 1):
        
            
        # take (i-1) for the index because it starts with zer    
-       counts[i-1,:,:] =  ( m[0:-i, :].T.dot(m[i:, :]) + sum_over ) 
+       counts[i,:,:] =  ( m[0:-i, :].T.dot(m[i:, :]) + sum_over ) 
        
-       counts[i-1,:,:] = utils.rowstochastic(counts[i-1,:,:])
+       counts[i,:,:] = utils.rowstochastic(counts[i,:,:])
        
+       counts[i,:,:] = np.linalg.inv(counts[0,:,:]).T.dot(counts[i,:,:])
     return counts
 
 
