@@ -11,27 +11,39 @@ class Trajectory:
             self.timeseries, self.centers) if sqd is None else sqd
         self.sigma = find_bandwidth(
             self.sqd, percentile) if sigma is None else sigma
-
-    @property
-    def membership(self):
-        return membership(self.sqd, self.sigma)
+        self.membership = membership(self.sqd, self.sigma)
+        self.mass = massmatrix(self.centers, self.sigma)
 
     @property
     def propagator(self):
-        return propagator(self.membership)
+        return propagator(self.membership, self.mass)
+
+def massmatrix(centers, sigma):
+    """ compute the inverse of the mass matrix / the overlap 
+    used to factor out the self-transitions induced by the overlapping basis"""
+    m = membership(sqdist(centers, centers), sigma)
+    p = m.T.dot(m)
+    return p
 
 
-def lagged_propagator(m, lag):
+def lagged_propagator(m, lag, mass=None):
     p = np.zeros([m.shape[1], m.shape[1]])
     for i in range(0,lag):
-        p += propagator(m[i::lag,:])
-    return p / lag
+        p += propagator(m[i::lag,:]) / lag
+    p = p / lag
+    if mass is not None:
+        p = mass.dot(p)
+    return p
 
 
-def propagator(m):
+def propagator(m, mass=None):
     " given the membership of a trajectory to some basis functions, estimate the propagator "
     counts = m[0:-1, :].T.dot(m[1:, :])
-    return utils.rowstochastic(counts)
+    p = counts
+    if mass is not None:
+        p = p.dot(np.linalg.inv(mass))
+    p = utils.rowstochastic(counts)
+    return p
 
 
 def membership(sqd, sigma):
