@@ -3,25 +3,40 @@ import numpy as np
 from scipy.spatial import distance
 
 
-def propagator(timeseries, centers, sigma):
-    """ Given `timeseries` data, estimate the propagator matrix.
+class Trajectory:
+    def __init__(self, timeseries, centers=None, sqd=None, sigma=None, percentile=50):
+        self.timeseries = timeseries
+        self.centers = timeseries if centers is None else centers
+        self.sqd = sqdist(
+            self.timeseries, self.centers) if sqd is None else sqd
+        self.sigma = find_bandwidth(
+            self.sqd, percentile) if sigma is None else sigma
 
-    Uses the galerkin projection onto Gaussian ansatz functions
-    with bandwidth `sigma` around the given `centers`. """
-    m = get_membership(timeseries, centers, sigma)
+    @property
+    def membership(self):
+        return membership(self.sqd, self.sigma)
+
+    @property
+    def propagator(self):
+        return propagator(self.membership)
+
+
+def propagator(m):
+    " given the membership of a trajectory to some basis functions, estimate the propagator "
     counts = m[0:-1, :].T.dot(m[1:, :])
     return utils.rowstochastic(counts)
 
 
-def get_membership(timeseries, centers, sigma):
-    """ Compute the pairwise membership / probability of each datapoint
-    to the Ansatz functions around each center. """
-    sqdist = distance.cdist(timeseries, centers, distance.sqeuclidean)
-    gausskernels = np.exp(-sqdist / (2 * sigma**2))
-    return utils.rowstochastic(gausskernels)
+def membership(sqd, sigma):
+    m = np.exp(sqd / (2 * sigma**2))
+    return utils.rowstochastic(m)
 
 
-def find_bandwidth(timeseries, centers, percentile=50):
+def sqdist(timeseries, centers):
+    return distance.cdist(timeseries, centers, distance.sqeuclidean)
+
+
+def find_bandwidth(sqd, percentile=50):
     """Find the bandwidth of the Gaussian based on: 
 
     "Stein Variational Gradient Descent: 
@@ -41,8 +56,7 @@ def find_bandwidth(timeseries, centers, percentile=50):
      Output:
          sigma: float, the  variance of the Gaussian"""
 
-    no_centers = np.shape(centers)[0]
-    sqdist = distance.cdist(timeseries, centers, distance.sqeuclidean)
+    no_centers = np.shape(sqd)[1]
 
     # since we have h = perc**2/log(n) = 2 * sigma**2
-    return np.percentile(sqdist, percentile) / np.sqrt(2*np.log(no_centers))
+    return np.percentile(sqd, percentile) / np.sqrt(2*np.log(no_centers))
