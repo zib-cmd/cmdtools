@@ -35,7 +35,7 @@ def propagator(m):
 
 
 def membership(sqd, sigma):
-    m = np.exp(sqd / (2 * sigma**2))
+    m = np.exp(-sqd / (2 * sigma**2))
     return utils.rowstochastic(m)
 
 
