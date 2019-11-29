@@ -8,7 +8,7 @@ Created on Thu Nov 28 13:27:22 2019
 
 
 import numpy as np
-from cmd.estimation.Newton_Npoints import Newton_N
+from cmdtools.estimation.Newton_Npoints import Newton_N
 
 
 def test_Newton():
