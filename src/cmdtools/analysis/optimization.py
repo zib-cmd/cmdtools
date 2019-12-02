@@ -31,7 +31,7 @@ def indexsearch(X):
     return ind
 
 
-def optimize(X, A, maxiter=1000):
+def optimize(X, A, maxiter=3000):
     if np.size(X, axis=1) > 1:
         x = A[1:, 1:]
         x = fmin(objective, x0=x, args=(X, A), maxiter=maxiter)

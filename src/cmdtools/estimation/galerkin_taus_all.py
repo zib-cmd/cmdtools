@@ -55,7 +55,9 @@ def propagator_tau(timeseries, centers, sigma, max_tau= 1):
        counts[i,:,:] = utils.rowstochastic(counts[i,:,:])
        
        counts[i,:,:] = np.linalg.inv(counts[0,:,:]).dot(counts[i,:,:])
-    #counts[0,:,:] = np.linalg.inv(counts[0,:,:]).dot(counts[0,:,:])
+       
+    counts[0,:,:] = np.linalg.inv(counts[0,:,:]).dot(counts[0,:,:])
+    
     return counts
 
 
@@ -104,16 +106,5 @@ def find_bandwidth(timeseries, centers, percentile=50): #, plot= True):
     no_centers = np.shape(centers)[0]
     sqdist = distance.cdist(timeseries, centers, distance.sqeuclidean)
 
-
-#   uncomment to plot
-#    if plot == True:
-#        plt.hist(sqdist.flatten())
-#        plt.vlines(np.percentile(sqdist,percentile), 0, 10, label= percentile)
-#        plt.grid()
-#        plt.title("Plot of the histogram with Euclidean distances and chosen percentile")
-#        plt.legend()
-#        plt.show()
-
-# since we have h = perc**2/log(n) = 2 * sigma**2 
     return np.percentile(sqdist,percentile)/ np.sqrt(2*np.log(no_centers)) 
 
