@@ -3,8 +3,8 @@ from scipy.linalg import schur, ordqz
 from .optimization import inner_simplex_algorithm, optimize
 
 
-def pcca(T, n):
-    X = schurvects(T, n)
+def pcca(T,  n, massmatrix = None):
+    X = schurvects(T, n, massmatrix)
     A = inner_simplex_algorithm(X)
     if n > 2:
         A = optimize(X, A)
@@ -30,8 +30,8 @@ def schurvects(T, n, massmatrix=None):
         _, X, _ = schur(T, sort=lambda x: np.real(x) > cutoff)
     else:
         _, _, _, _, _, X = \
-            ordqz(T, massmatrix, sort=lambda a, b: np.real(a / b) > cutoff)
-
+            ordqz(T, massmatrix, sort=lambda a,b: sortqz(a,b,cutoff))
+	
     X = X[:, 0:n]  # use only first n vectors
 
     # move constant vector to the front, make it 1
@@ -41,3 +41,7 @@ def schurvects(T, n, massmatrix=None):
     X[:, 0] = 1
 
     return X
+
+def sortqz(a,b,cutoff):
+    print(b)
+    return np.real(a / b) > cutoff

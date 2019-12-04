@@ -49,14 +49,14 @@ def propagator_tau(timeseries, centers, sigma, max_tau= 1):
            sum_over += m[j:-(i+j), :].T.dot(m[(i+j):-j, :])
        
            
-       # take (i-1) for the index because it starts with zer    
+    
        counts[i,:,:] =  ( m[0:-i, :].T.dot(m[i:, :]) + sum_over ) 
        
        counts[i,:,:] = utils.rowstochastic(counts[i,:,:])
        
-       counts[i,:,:] = np.linalg.inv(counts[0,:,:]).dot(counts[i,:,:])
+       #counts[i,:,:] = np.linalg.inv(counts[0,:,:]).dot(counts[i,:,:])
        
-    counts[0,:,:] = np.linalg.inv(counts[0,:,:]).dot(counts[0,:,:])
+    #counts[0,:,:] = np.linalg.inv(counts[0,:,:]).dot(counts[0,:,:])
     
     return counts
 
