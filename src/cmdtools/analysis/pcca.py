@@ -43,5 +43,5 @@ def schurvects(T, n, massmatrix=None):
     return X
 
 def sortqz(a,b,cutoff):
-    print(b)
+    #print(b)
     return np.real(a / b) > cutoff
