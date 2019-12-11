@@ -18,10 +18,18 @@ from scipy.sparse import random
 from cmdtools.estimation import Newton_Npoints
 from cmdtools.analysis import pcca
 
-def compare_subspace(Q_init, Q_comp, n= 3):
-    Schur_init = pcca.schurvects(Q_init,n)
-    Schur_comp = pcca.schurvects(Q_comp,n)
-    return(Schur_init, Schur_comp,np.rad2deg(subspace_angles(Schur_init, Schur_comp)[0]))
+def compare_subspace(Q_init, Q_comp, n= 4):
+    try:
+        Schur_init = pcca.schurvects(Q_init,n)
+    except AssertionError:
+        Schur_init = pcca.schurvects(Q_init,n+1)
+        
+    try:
+        Schur_comp = pcca.schurvects(Q_comp,n)
+    except AssertionError:
+        Schur_comp = pcca.schurvects(Q_comp,n+1)
+        
+    return(Schur_init, Schur_comp,np.rad2deg(subspace_angles(Schur_init[:,:n], Schur_comp[:,:n])[0]))
     
 def compare_op_norm():
     pass
@@ -40,22 +48,26 @@ def smt(infgen):
     err_old = 1.
     tau = int(0)
     T = np.array([expm(infgen*0.)])
-    n = 2
+  
     while  abs(err_new-err_old) > 10**(-3) :
         tau += 1
         #print(tau)
         T = np.concatenate((T, [expm(infgen*tau)]))
         Q_ex = Newton_Npoints.Newton_N(T,1.,0.)
         
-        try:
-            
-            err_new = compare_subspace(infgen, Q_ex,n)[2]#np.mean(abs(infgen - Q_ex))
-            err_old = err_new
-        except AssertionError:
-            n += 1
-            continue
-        except IndexError:
-            break
+        err_new = compare_subspace(infgen, Q_ex)[2]#np.mean(abs(infgen - Q_ex))
+        err_old = err_new
+#        try:
+#            
+#            err_new = compare_subspace(infgen, Q_ex,n)[2]#np.mean(abs(infgen - Q_ex))
+#            err_old = err_new
+#        except:
+#            n += 1
+#            err_new = compare_subspace(infgen, Q_ex,n)[2]#np.mean(abs(infgen - Q_ex))
+#            err_old = err_new
+#          # continue
+        #except IndexError:
+         #   break
         #print(err_new, err_old)
     return (np.shape(infgen)[0], err_new, tau )#,(err_new/np.shape(infgen)[0]) )
         

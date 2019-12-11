@@ -61,6 +61,22 @@ def propagator_tau(timeseries, centers, sigma, max_tau= 1):
     
     return counts, m
 
+#def strip_bad(counts_tensor ):
+#    """Find the lines in which the selfoverlap of the basis functions is not 
+#    good, strip those basis points from the
+#    Input:
+#        
+#    Output:
+#        """
+#    S = counts_tensor[0,:,:]
+#    to_keep = []
+#    for i in range(np.shape(S)[0]):
+#        if np.argmax(S[i,:]) == i:
+#            to_keep.append(i)
+#    for j in range(np.shape(counts_tensor)[0]):
+#        counts_tensor[j,:,:] = utils.rowstochastic(counts_tensor[j,:,:])   
+#    return counts_tensor[:,to_keep,to_keep]
+   
 
 def get_membership(timeseries, centers, sigma):
     """ Compute the pairwise membership / probability of each datapoint
