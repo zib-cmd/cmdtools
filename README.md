@@ -5,7 +5,7 @@ This Python library implements a suite of tools used and/or developed in the [Co
 
 ## Installation
 
-1.  Clone the repository with `git clone https://git.zib.de/cmd/cmdtools.git`
+1.  Clone the repository with `git clone https://git.zib.de/bzfsechi/cmdtools.git`
 2.  Install into your python library with `pip install -e cmdtools`
 
 ## Contents
