@@ -17,7 +17,7 @@ def schurvects(T, n, massmatrix=None):
 
     v_in  = np.real(e[-n])
     v_out = np.real(e[-(n + 1)])
-    print(np.real(e))
+    #print(np.real(e))
     # do not seperate conjugate eigenvalues
     assert not np.isclose(v_in, v_out), \
         "Cannot seperate conjugate eigenvalues, choose another n"
