@@ -18,18 +18,23 @@ from scipy.sparse import random
 from cmdtools.estimation import Newton_Npoints
 from cmdtools.analysis import pcca
 
-def compare_subspace(Q_init, Q_comp, n= 4):
+def get_vectors(M_, no_clus = 2):
     try:
-        Schur_init = pcca.schurvects(Q_init,n)
+        Schur_init = pcca.schurvects(M_,no_clus)
     except AssertionError:
-        Schur_init = pcca.schurvects(Q_init,n+1)
+        Schur_init = get_vectors (M_, no_clus+1)
+    return( Schur_init)
+    
+def compare_subspace(Q_init, Q_comp, n= 2):
+
+    Schur_init = get_vectors(Q_init,n)
+
+    Schur_comp = get_vectors(Q_comp,n)
+            
+    n_i = np.shape(Schur_init)[1]
+    n_c = np.shape(Schur_comp)[1]
         
-    try:
-        Schur_comp = pcca.schurvects(Q_comp,n)
-    except AssertionError:
-        Schur_comp = pcca.schurvects(Q_comp,n+1)
-        
-    return(Schur_init, Schur_comp,np.rad2deg(subspace_angles(Schur_init[:,:n], Schur_comp[:,:n])[0]))
+    return(np.rad2deg(subspace_angles(Schur_init[:,:min(n_i,n_c)], Schur_comp[:,:min(n_i,n_c)])[0]))
     
 def compare_op_norm():
     pass
@@ -49,26 +54,16 @@ def smt(infgen):
     tau = int(0)
     T = np.array([expm(infgen*0.)])
   
-    while  abs(err_new-err_old) > 10**(-3) :
+    while  abs(err_new-err_old) > 10**(-12) :
+        
         tau += 1
         #print(tau)
         T = np.concatenate((T, [expm(infgen*tau)]))
         Q_ex = Newton_Npoints.Newton_N(T,1.,0.)
         
-        err_new = compare_subspace(infgen, Q_ex)[2]#np.mean(abs(infgen - Q_ex))
+        err_new = compare_subspace(infgen, Q_ex)#[2]#np.mean(abs(infgen - Q_ex))
         err_old = err_new
-#        try:
-#            
-#            err_new = compare_subspace(infgen, Q_ex,n)[2]#np.mean(abs(infgen - Q_ex))
-#            err_old = err_new
-#        except:
-#            n += 1
-#            err_new = compare_subspace(infgen, Q_ex,n)[2]#np.mean(abs(infgen - Q_ex))
-#            err_old = err_new
-#          # continue
-        #except IndexError:
-         #   break
-        #print(err_new, err_old)
+
     return (np.shape(infgen)[0], err_new, tau )#,(err_new/np.shape(infgen)[0]) )
         
 #%%
@@ -78,14 +73,14 @@ def __testNewton__(min_points = 50, max_points = 100 , step_ = 10):
     list_out = []
     for j in range(2,10):
         max_error = np.array([0.,0.,0.])
-        for i in range(50, int(max_points),int (step_)):
-            
+        for i in range(min_points, int(max_points),int (step_)):
             max_error= np.vstack((max_error,smt(make_sparse_Q(i, 0.1*j))))
+        
         list_out.append(max_error[1:,:])
     return list_out
        
 #%%
-a = __testNewton__()
+a = __testNewton__(15,35, step_ = 5)
 
 plt.figure()
 for i in range(len(a)):
