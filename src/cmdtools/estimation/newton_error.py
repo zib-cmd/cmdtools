@@ -18,23 +18,24 @@ from scipy.sparse import random
 from cmdtools.estimation import Newton_Npoints
 from cmdtools.analysis import pcca
 
-def get_vectors(M_, no_clus = 2):
+def get_vectors(M_, no_clus=1):
+    #while abs(np.shape(M_)[0]-no_clus) > 1:
     try:
-        Schur_init = pcca.schurvects(M_,no_clus)
+        Schur_init = pcca.schurvects(M_, no_clus)
     except AssertionError:
         Schur_init = get_vectors (M_, no_clus+1)
     return( Schur_init)
     
 def compare_subspace(Q_init, Q_comp, n= 2):
 
-    Schur_init = get_vectors(Q_init,n)
+    Schur_init = get_vectors(Q_init, n)
 
-    Schur_comp = get_vectors(Q_comp,n)
+    Schur_comp = get_vectors(Q_comp, n)
             
     n_i = np.shape(Schur_init)[1]
     n_c = np.shape(Schur_comp)[1]
         
-    return(np.rad2deg(subspace_angles(Schur_init[:,:min(n_i,n_c)], Schur_comp[:,:min(n_i,n_c)])[0]))
+    return(np.rad2deg(subspace_angles(Schur_init[:,:min(n_i, n_c)], Schur_comp[:,:min(n_i, n_c)])[0]))
     
 def compare_op_norm():
     pass
@@ -47,6 +48,13 @@ def make_sparse_Q(dim, dens = 0.1):
         Q[i,i] = - np.sum(Q[i,:]) + Q[i,i]
     return(Q)
 
+def check_Q (Q_init, dens ):
+    shape = np.shape(Q_init)[0]
+    try: 
+        Schur_pre_init = get_vectors(Q_init, 2)
+    except IndexError:
+        Q_init = make_sparse_Q(shape, dens)
+    return Q_init
 
 def smt(infgen):
     err_new = 1000.  
@@ -65,13 +73,22 @@ def smt(infgen):
         err_old = err_new
 
     return (np.shape(infgen)[0], err_new, tau )#,(err_new/np.shape(infgen)[0]) )
+
+def wrap(dim, dens = 0.1):
+    Q_first = make_sparse_Q(dim, dens)
+    Q_second = check_Q(Q_first, dens)
+    
+    if (Q_first == Q_second).all():
+        return Q_first
+    else:
         
+     
 #%%
  
 #    
 def __testNewton__(min_points = 50, max_points = 100 , step_ = 10):
     list_out = []
-    for j in range(2,10):
+    for j in range(5,10):
         max_error = np.array([0.,0.,0.])
         for i in range(min_points, int(max_points),int (step_)):
             max_error= np.vstack((max_error,smt(make_sparse_Q(i, 0.1*j))))
@@ -80,7 +97,7 @@ def __testNewton__(min_points = 50, max_points = 100 , step_ = 10):
     return list_out
        
 #%%
-a = __testNewton__(15,35, step_ = 5)
+a = __testNewton__(70,86, step_ = 5)
 
 plt.figure()
 for i in range(len(a)):
