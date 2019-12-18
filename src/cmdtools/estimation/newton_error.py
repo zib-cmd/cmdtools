@@ -17,13 +17,15 @@ from scipy.linalg import expm, subspace_angles
 from scipy.sparse import random
 from cmdtools.estimation import Newton_Npoints
 from cmdtools.analysis import pcca
-
+global blabla
 def get_vectors(M_, no_clus=1):
+    global blabla
+    blabla = M_
     #while abs(np.shape(M_)[0]-no_clus) > 1:
     try:
         Schur_init = pcca.schurvects(M_, no_clus)
     except AssertionError:
-        Schur_init = get_vectors (M_, no_clus+1)
+        Schur_init = pcca.schurvects(M_, no_clus+1)
     return( Schur_init)
     
 def compare_subspace(Q_init, Q_comp, n= 2):
@@ -73,14 +75,14 @@ def smt(infgen):
         err_old = err_new
 
     return (np.shape(infgen)[0], err_new, tau )#,(err_new/np.shape(infgen)[0]) )
-
-def wrap(dim, dens = 0.1):
-    Q_first = make_sparse_Q(dim, dens)
-    Q_second = check_Q(Q_first, dens)
-    
-    if (Q_first == Q_second).all():
-        return Q_first
-    else:
+#
+#def wrap(dim, dens = 0.1):
+#    Q_first = make_sparse_Q(dim, dens)
+#    Q_second = check_Q(Q_first, dens)
+#    
+#    if (Q_first == Q_second).all():
+#        return Q_first
+#    else:
         
      
 #%%
@@ -88,21 +90,21 @@ def wrap(dim, dens = 0.1):
 #    
 def __testNewton__(min_points = 50, max_points = 100 , step_ = 10):
     list_out = []
-    for j in range(5,10):
+    for j in range(10,15):
         max_error = np.array([0.,0.,0.])
         for i in range(min_points, int(max_points),int (step_)):
-            max_error= np.vstack((max_error,smt(make_sparse_Q(i, 0.1*j))))
+            max_error= np.vstack((max_error,smt(make_sparse_Q(i, 0.01*j))))
         
         list_out.append(max_error[1:,:])
     return list_out
        
 #%%
-a = __testNewton__(70,86, step_ = 5)
+a = __testNewton__(20,50, step_ = 5)
 
 plt.figure()
 for i in range(len(a)):
     array = a[i]
-    plt.plot(array[:,0], array[:,1], marker= "o", label = np.round(0.1*(i+1),2))
+    plt.plot(array[:,0], array[:,1], marker= "o", label = np.round(0.01*(i+1),2))
 plt.xlabel("no. of basis points")
 plt.ylabel("mean abs error Q_comp-Q_initial")
 plt.title("error development vs dimensionality of sparse infgen")
