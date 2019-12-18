@@ -27,7 +27,7 @@ from cmdtools.estimation import galerkin_taus_all, Newton_Npoints, picking_algor
 #load trajectory    
 diala = np.load("arr_0.npy")
 #centers= np.loadtxt("./Kmean_diala150.txt")
-centers = picking_algorithm.picking_algorithm(-np.pi, np.pi, 2, 75)[1]
+centers = picking_algorithm.picking_algorithm(-np.pi, np.pi, 2, 75, diala )[1]
 
 centers= centers[centers[:, 0].argsort()]
 #sigma_list = np.loadtxt("sigmas_10to90_randomuniform.txt")
