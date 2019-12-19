@@ -27,10 +27,10 @@ from cmdtools.estimation import galerkin_taus_all, Newton_Npoints, picking_algor
 #load trajectory    
 diala = np.load("arr_0.npy")
 #centers= np.loadtxt("./Kmean_diala150.txt")
-centers = picking_algorithm.picking_algorithm(diala[::100,:],150)[1]
+centers = picking_algorithm.picking_algorithm(diala[::200,:], 200)[1]
 #%%
-plt.scatter( diala[::100,0], diala[::100,1])
-plt.scatter(centers[:,0], centers[:,1])
+plt.scatter( diala[::100, 0], diala[::100, 1])
+plt.scatter(centers[:, 0], centers[:, 1])
 #%%
 centers= centers[centers[:, 0].argsort()]
 #sigma_list = np.loadtxt("sigmas_10to90_randomuniform.txt")
@@ -47,7 +47,7 @@ centers= centers[centers[:, 0].argsort()]
 #%%
 # estimate with Galerkin discretization the transfer operator
 #estimate 
-Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala, centers, 0.1, 4)
+Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala, centers, 0.15, 4)
 #%%
 def strip_bad(counts_tensor):
     """Find the lines in which the selfoverlap of the basis functions is not 
@@ -78,9 +78,9 @@ S_ = Koopman_mtx2[0, :, :]
 
 #np.sum(Koopman_mtx[0,:,:], axis= 1)
 #%%
-chi = pcca.pcca(Koopman_mtx2[1, :, :], 4, S_)
+chi = pcca.pcca(Koopman_mtx2[1, :, :], 5, S_)
 #visualize pcca+ Koopman matrix 
-plt.imshow( chi, aspect= "auto")
+plt.imshow( chi, aspect="auto")
 plt.colorbar()
 plt.show()
     
@@ -89,7 +89,7 @@ plt.show()
 #estimate generator
 
 Infgen = Newton_Npoints.Newton_N(Koopman_mtx2, 1., 0)
-chi_infgen= pcca.pcca(Infgen,5, S_)
+chi_infgen= pcca.pcca(Infgen,4, S_)
 
 #%%
 
@@ -114,7 +114,7 @@ centers_1 = centers[centers_kept, :]
 #plt.hist2d(diala[:,0],diala[:,1], 100)
 for i in range(np.shape(chi_infgen)[0]):
     #print(colors[np.argmax(chi[i,:])])
-    plt.scatter(centers_1[i,0], centers_1[i,1], color = colors[np.argmax(chi_infgen[i,:])])
+    plt.scatter(centers_1[i, 0], centers_1[i, 1], color = colors[np.argmax(chi_infgen[i, :])])
 plt.xlabel("$\Phi$ [rad]")
 plt.ylabel("$\Psi$ [rad]")
 plt.title("Alanine Dipeptide, 6 Metastable States")
@@ -124,4 +124,5 @@ plt.show()
 #%%
 Q_c = np.linalg.pinv(chi_infgen).dot(Infgen.dot(chi_infgen))
 #%%
-plt.scatter(diala[:,0],diala[:,1], marker = ".")
+print(np.round(Q_c, 3))
+#plt.scatter(diala[:,0],diala[:,1], marker = ".")

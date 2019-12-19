@@ -19,9 +19,9 @@ def picking_list(d, n):
     q1 = 0
     q2 = np.argmax(d[q1, :])
     qs = [q1, q2]
-    for k in range(1,n):
-        ss = np.argmin(d[qs,:], axis=0)
-        mins = list(d[qs[j], s] for s,j in enumerate(ss))
+    for k in range(1, n):
+        ss = np.argmin(d[qs, :], axis=0)
+        mins = list(d[qs[j], s] for s, j in enumerate(ss))
         q = np.argmax(mins)
         qs.append(q)
     return qs
@@ -43,7 +43,7 @@ def picking_algorithm(traj, n):
     
     return(traj, traj[picking_list(distances, n),:])
     
-#%%
+##%%
     
 #def brownian(x0, n, dt, delta, out=None):
 #    x0 = np.asarray(x0)
@@ -64,7 +64,7 @@ def picking_algorithm(traj, n):
 #    out += np.expand_dims(x0, axis=-1)
 #
 #    return out
-#%%
+##%%
 #delta = 0.5
 ## Total time.
 #T = 10.0
