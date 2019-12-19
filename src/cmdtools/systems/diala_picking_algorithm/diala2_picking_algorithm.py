@@ -27,15 +27,15 @@ from cmdtools.estimation import galerkin_taus_all, Newton_Npoints, picking_algor
 #load trajectory    
 diala = np.load("arr_0.npy")
 #centers= np.loadtxt("./Kmean_diala150.txt")
-centers = picking_algorithm.picking_algorithm(diala[::100,:],100)[1]
-
-plt.scatter( diala[::500,0], diala[::500,1])
+centers = picking_algorithm.picking_algorithm(diala[::100,:],150)[1]
+#%%
+plt.scatter( diala[::100,0], diala[::100,1])
 plt.scatter(centers[:,0], centers[:,1])
 #%%
 centers= centers[centers[:, 0].argsort()]
 #sigma_list = np.loadtxt("sigmas_10to90_randomuniform.txt")
 #%%
-
+#np.savetxt("p_a_100centers.txt", centers)
 #estimate centers from 
 #centers = np.delete(centers , [32,40,59,60,55,61,62 ,63], 0)
 #plt.scatter(centers[:,0], centers[:,1])
@@ -89,7 +89,7 @@ plt.show()
 #estimate generator
 
 Infgen = Newton_Npoints.Newton_N(Koopman_mtx2, 1., 0)
-chi_infgen= pcca.pcca(Infgen,4, S_)
+chi_infgen= pcca.pcca(Infgen,5, S_)
 
 #%%
 
