@@ -58,7 +58,7 @@ def grad_at_point(q, S, n):
     A = np.zeros((row_q, row_q))
     bS = np.zeros((row_q, 1))
     
-    v = q-(np.matmul(np.reshape(q[:, n], (2, 1)), np.ones((1, np.shape(q)[1]))))
+    v = q-(np.matmul(np.reshape(q[:, n], (row_q, 1)), np.ones((1, np.shape(q)[1]))))
   
     dist = np.sum(v * v, axis=0)
     
@@ -89,13 +89,12 @@ def grad_chi(q, S):
     
     Input:
         q = array, the rows represents different dimensions
-        S = arr, the vector whose calculate the gradient
+        S = array, the vector whose calculate the gradient
         
     Output : 
-        grad_array = the gradient values of chi at the points listed in q. The
-                     rows represent the same dimensions (e.g. first row is
-                     x coordinate, second row is y coordinate etc.).
-
+        grad_array = array, the gradient values of chi at the points listed 
+                     in q. The rows represent the same dimensions (e.g. first
+                     row is x coordinate, second row is y coordinate etc.).
         """
     grad_array = np.zeros((2, 1))
     for i in range(np.shape(q)[1]):
