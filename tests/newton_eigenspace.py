@@ -13,6 +13,7 @@ from scipy.sparse import random
 from scipy.linalg import expm, subspace_angles, schur
 #from cmdtools.analysis import pcca
 from cmdtools.estimation import Newton_Npoints, sqra
+from cmdtools.analysis import pcca
 #%%
 def q_doublewell(dim,beta):
      # number of intervals in [0,1]-space (e.g. 30)
@@ -55,17 +56,28 @@ def obtain_k(tau_max, step, dim=50, beta=1, noise=False):
             k_matrix[i,:,:] = expm(tau_values[i]*infgen)       
     return(k_matrix, infgen)
 def compare_eigenspace(k_matrix, infgen):
-    newton_infgen = Newton_Npoints.Newton_N(k_matrix, 1., 0)
-    schur_infgen = schur(infgen)[1]
-    schur_newton_infgen = schur(newton_infgen)[1]
+    newton_infgen = Newton_Npoints.Newton_N(k_matrix, 1, 0)
+    #schur_infgen = schur(infgen)[1]
+    #schur_newton_infgen = schur(newton_infgen)[1]
     #print(schur_infgen, schur_newton_infgen)
+    schur_infgen = pcca.schurvects(infgen, 3)
+    schur_newton_infgen = pcca.schurvects(newton_infgen, 3)
+  
     angle = subspace_angles(schur_infgen, schur_newton_infgen)
-    return( np.rad2deg(angle), newton_infgen)
+    return(angle, newton_infgen, schur_infgen, schur_newton_infgen)
     
-k , q = obtain_k(6, 5, dim=100, beta = 10, noise =False) 
+#k , q = obtain_k(6, 5, dim=100, beta = 10, noise =False) 
 
-alpha, q_NEW = compare_eigenspace(k, q)
+#alpha, q_NEW = compare_eigenspace(k, q)
 
 #%%
 dw = q_doublewell(77,10)
-    
+#%%
+q = np.array([[-3., 2., 0., 1., 0., 0.],[2.,-3.,0.5,0.,.5,0.],[0., 0., -3., 2.5, .5, 0.],[0.5, 0.,3., -4., 0., 0.5],[0., 0., 0.5,0.5,-5,4.],[0.,0.25,0.25,0.5,4.,-5.]])
+plt.imshow(q)
+tau = np.arange(0,7,step= 1)
+k = np.zeros((2, 6,6))
+for i in range(np.shape(k)[0]):
+    k[i,:,:] = expm(tau[i]*q)   
+q_new = Newton_Npoints.Newton_N(k, 1,0)
+beta = subspace_angles(q,q_new)
