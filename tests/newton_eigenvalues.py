@@ -55,17 +55,6 @@ def obtain_k(tau_max, step, dim=50, beta=1, noise=False):
         for i in range(np.shape(k_matrix)[0]):
             k_matrix[i,:,:] = expm(tau_values[i]*infgen)       
     return(k_matrix, infgen)
-def compare_eigenspace(k_matrix, infgen):
-    newton_infgen = Newton_Npoints.Newton_N(k_matrix, 1, 0)
-    #schur_infgen = schur(infgen)[1]
-    #schur_newton_infgen = schur(newton_infgen)[1]
-    #print(schur_infgen, schur_newton_infgen)
-    schur_infgen = pcca.schurvects(infgen, 3)
-    schur_newton_infgen = pcca.schurvects(newton_infgen, 3)
-  
-    angle = subspace_angles(schur_infgen, schur_newton_infgen)
-    return(angle, newton_infgen, schur_infgen, schur_newton_infgen)
-    
 #k , q = obtain_k(6, 5, dim=100, beta = 10, noise =False) 
 
 #alpha, q_NEW = compare_eigenspace(k, q)
