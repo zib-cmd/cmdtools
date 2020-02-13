@@ -20,11 +20,11 @@ def q_doublewell(dim, beta):
      # inverse temperature for Boltzmann (e.g. 10)
 
     # grid & flux computation according to Luca Donati
-    grid = np.linspace(-2, 2, dim+1)
-    phi = dim**2 / beta / 9
-
+    grid = np.linspace(-2.5, 2.5, dim+1)
+    #phi = dim**2 / beta / 9
+    phi = 1.
     # potential
-    u = np.exp(-(grid**2-2)**2)
+    u = 1/(50)*(grid**2-2)**2
     G = nx.erdos_renyi_graph(dim+1, 0.1)
    # G = nx.les_miserables_graph()
     A = nx.adjacency_matrix(G)
@@ -35,14 +35,15 @@ def q_doublewell(dim, beta):
    # A = A + A.T
 
     return sqra.sqra(u, A, beta, phi)
-  
+example = q_doublewell(100,10)
+#%%  
 def obtain_q(dim=50, beta=1):
 #    infgen = random(dim, dim, density).toarray()
     infgen = q_doublewell(dim-1, beta)
 #    print(np.shape(infgen))
 #  infgen = sqra.sqra()
     infgen[np.diag_indices(dim)] = - np.sum(infgen- np.diagflat(np.diagonal(infgen)), axis=1)
-    return infgen*0.005
+    return infgen#*0.005
 def obtain_k(tau_max, step, dim=50, beta=1):#, noise=False):
     infgen = obtain_q(dim, beta)
     k_matrix = np.zeros((int(tau_max/step) +1, dim, dim))
@@ -58,10 +59,10 @@ def obtain_k(tau_max, step, dim=50, beta=1):#, noise=False):
 
 
 #%%
-dw = q_doublewell(100,10)
+#dw = q_doublewell(100,10)
 #%%
-q = np.array([[-3., 2., 0., 1., 0., 0.],[2.,-3.,0.5,0.,.5,0.],[0., 0., -3., 2.5, .5, 0.],[0.5, 0.,3., -4., 0., 0.5],[0., 0., 0.5,0.5,-5,4.],[0.,0.25,0.25,0.5,4.,-5.]])
-plt.imshow(q)
+q = np.array([[-3., 2., 0., 1., 0., 0.], [2.,-3.,0.5,0.,.5,0.], [0., 0., -3., 2.5, .5, 0.], [0.5, 0.,3., -4., 0., 0.5], [0., 0., 0.5,0.5,-5,4.], [0.,0.25,0.25,0.5,4.,-5.]])
+#plt.imshow(q)
 tau = np.arange(0,9,step= 1)
 k = np.zeros((9, 6,6))
 for i in range(np.shape(k)[0]):
@@ -69,21 +70,21 @@ for i in range(np.shape(k)[0]):
 q_new = Newton_Npoints.Newton_N(k, 1,0)
 #beta = subspace_angles(pcca.schurvects(q,4),pcca.schurvects(q_new,4))
 #%%
-def sort_schur(T, n=2):
-    e = np.sort(np.linalg.eigvals(T))
-
-    v_in  = np.real(e[-n])
-    v_out = np.real(e[-(n + 1)])
-    cutoff = (v_in+v_out)/2
-    E, X, _ = schur(T, sort=lambda x: np.real(x) > cutoff)
-    return(E, X)
-    
-def compare_eigenvals(m1, m2, n=2):
-    evals1 = sort_schur(m1, n)[0]
-    evals2 = sort_schur(m2, n)[0]
-    return(np.linalg.norm(evals1-evals2))
-s1 = sort_schur(q, n=3)[0]
-s2 = sort_schur(q_new, n=3)[0]
+#def sort_schur(T, n=2):
+#    e = np.sort(np.linalg.eigvals(T))
+#
+#    v_in  = np.real(e[-n])
+#    v_out = np.real(e[-(n + 1)])
+#    cutoff = (v_in+v_out)/2
+#    E, X, _ = schur(T, sort=lambda x: np.real(x) > cutoff)
+#    return(E, X)
+#    
+#def compare_eigenvals(m1, m2, n=2):
+#    evals1 = sort_schur(m1, n)[0]
+#    evals2 = sort_schur(m2, n)[0]
+#    return(np.linalg.norm(evals1-evals2))
+#s1 = sort_schur(q, n=3)[0]
+#s2 = sort_schur(q_new, n=3)[0]
 #%%
 def dummy_compare(m1,m2):
     ew1 = np.sort(np.real(np.linalg.eigvals(m1)))
@@ -97,19 +98,35 @@ def find_min_error(tau_max=2, step=1, dim=50, beta=1):
         k_matrix[i, :, :] = expm(tau_values[i]*infgen)  
     infgen_new = Newton_Npoints.Newton_N(k_matrix, 1.,0)
     err_old = (dummy_compare(infgen_new, infgen)[0])[-2] 
-    print(err_old)
+   # print(err_old)
     err_new = err_old +1.
-    while not (err_old - err_new) ==0:
+    while abs(err_old - err_new)>10**(-8):
         err_old = err_new
         tau_max+=1
-        k_matrix = np.concatenate((k_matrix, expm(tau_max*infgen)))
+        k_matrix = np.vstack((k_matrix, expm(tau_max*infgen)[None]))
         infgen_new = Newton_Npoints.Newton_N(k_matrix, 1.,0)
         err_new = (dummy_compare(infgen_new, infgen)[0])[-2]
-    return(tau_max, err_new, k_matrix, infgen, infgen_new)
+    return(tau_max-1, dummy_compare(infgen_new, infgen)[0], k_matrix, infgen, infgen_new)
     
     #%%
-print(dummy_compare(q,q_new)[0])
+#print(dummy_compare(q,q_new)[0])
 #%%
 #k , q = obtain_k(6, 1, dim=100, beta = 10, noise =False) 
+res = find_min_error(2,1,20, 1.)
 
 #alpha, q_NEW = compare_eigenspace(k, q)
+#%%
+ #test for statistics of error with these parameters
+#arrays = []
+#for i in range(100):
+#    res = find_min_error(2,1,110,10)
+#    arrays.append(res)
+#    
+#np.savez("test_newton_dim110_b10", *arrays)
+##%%
+#file = np.load("test_newton_dim110_b10.npz", allow_pickle=True)
+#snd_eigval = []
+#for i in range(100):
+#    snd_eigval.append(((file["arr_%d"%i])[1])[-2])
+#    #%%
+#plt.hist(snd_eigval, bins = 20)
