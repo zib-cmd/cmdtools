@@ -21,8 +21,11 @@ def q_doublewell(dim, beta):
 
     # grid & flux computation according to Luca Donati
     grid = np.linspace(-2.5, 2.5, dim+1)
-    #phi = dim**2 / beta / 9
-    phi = 1.
+    #using the ideas of the presentation of Donati
+    m = 1.
+    gamma = 1.    
+    sigma = np.sqrt(2/(beta*m*gamma))
+    phi = sigma**2/(2*abs(grid[0]-grid[1]))
     # potential
     u = 1/(50)*(grid**2-2)**2
     G = nx.erdos_renyi_graph(dim+1, 0.1)
@@ -32,7 +35,8 @@ def q_doublewell(dim, beta):
 
     A[np.diag_indices(dim+1)] = 0.
   #  A = np.diag(np.ones(dim), k=1)
-   # A = A + A.T
+  
+    A = np.triu(A) + np.triu(A).T
 
     return sqra.sqra(u, A, beta, phi)
 example = q_doublewell(100,10)
@@ -112,21 +116,25 @@ def find_min_error(tau_max=2, step=1, dim=50, beta=1):
 #print(dummy_compare(q,q_new)[0])
 #%%
 #k , q = obtain_k(6, 1, dim=100, beta = 10, noise =False) 
-res = find_min_error(2,1,20, 1.)
+res = find_min_error(2,1,40, 1.)
 
 #alpha, q_NEW = compare_eigenspace(k, q)
 #%%
  #test for statistics of error with these parameters
-#arrays = []
-#for i in range(100):
-#    res = find_min_error(2,1,110,10)
-#    arrays.append(res)
+
+for j in np.arange(10,200, step=10):
+    arrays = []
+    for i in range(100):
+        res = find_min_error(2,1,j,5.)
+        arrays.append(res)
 #    
-#np.savez("test_newton_dim110_b10", *arrays)
-##%%
-#file = np.load("test_newton_dim110_b10.npz", allow_pickle=True)
-#snd_eigval = []
-#for i in range(100):
-#    snd_eigval.append(((file["arr_%d"%i])[1])[-2])
-#    #%%
-#plt.hist(snd_eigval, bins = 20)
+#    np.savez("test_newton_dim%d_b5"%j, *arrays)
+    
+#%%
+file = np.load("test_newton_dim30_b1.npz", allow_pickle=True)
+snd_eigval = []
+for i in range(100):
+    snd_eigval.append(((file["arr_%d"%i])[1])[-2])
+    #%%
+plt.hist(snd_eigval, bins = 20)
+tryk = file['arr_0'][2]
