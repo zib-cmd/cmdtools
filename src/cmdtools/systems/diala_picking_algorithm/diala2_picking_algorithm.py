@@ -47,7 +47,7 @@ centers= centers[centers[:, 0].argsort()]
 #%%
 # estimate with Galerkin discretization the transfer operator
 #estimate 
-Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala, centers, 0.15, 4)
+Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala[::10,:], centers, 0.1, 4)
 #%%
 def strip_bad(counts_tensor):
     """Find the lines in which the selfoverlap of the basis functions is not 
@@ -78,7 +78,7 @@ S_ = Koopman_mtx2[0, :, :]
 
 #np.sum(Koopman_mtx[0,:,:], axis= 1)
 #%%
-chi = pcca.pcca(Koopman_mtx2[1, :, :], 5, S_)
+chi = pcca.pcca(Koopman_mtx2[1, :, :], 4, S_)
 #visualize pcca+ Koopman matrix 
 plt.imshow( chi, aspect="auto")
 plt.colorbar()
@@ -114,10 +114,10 @@ centers_1 = centers[centers_kept, :]
 #plt.hist2d(diala[:,0],diala[:,1], 100)
 for i in range(np.shape(chi_infgen)[0]):
     #print(colors[np.argmax(chi[i,:])])
-    plt.scatter(centers_1[i, 0], centers_1[i, 1], color = colors[np.argmax(chi_infgen[i, :])])
+    plt.scatter(centers_1[i, 0], centers_1[i, 1], color = colors[np.argmax(chi[i, :])])
 plt.xlabel("$\Phi$ [rad]")
 plt.ylabel("$\Psi$ [rad]")
-plt.title("Alanine Dipeptide, 6 Metastable States")
+plt.title("Alanine Dipeptide, 4 Metastable States")
 plt.xlim(-np.pi, np.pi)
 plt.show()
 #%%

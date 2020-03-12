@@ -27,7 +27,7 @@ def q_doublewell(dim, sigma):
    # sigma = np.sqrt(2/(beta*m*gamma))
     phi = sigma**2/(2*abs(grid[0]-grid[1]))
     # potential
-    u = 1/(50)*(grid**2-2)**2
+    u = 1/(500)*(grid**2-2)**2
     G = nx.erdos_renyi_graph(dim+1, 0.1)
    # G = nx.les_miserables_graph()
     A = nx.adjacency_matrix(G)
@@ -63,7 +63,8 @@ def obtain_k(tau_max, step, dim=50, sigma=1):#, noise=False):
 
 
 #%%
-#dw = q_doublewell(100,10)
+dw = obtain_q(100,0.2)
+print(np.linalg.cond(dw, -2))
 #%%
 q = np.array([[-3., 2., 0., 1., 0., 0.], [2.,-3.,0.5,0.,.5,0.], [0., 0., -3., 2.5, .5, 0.], [0.5, 0.,3., -4., 0., 0.5], [0., 0., 0.5,0.5,-5,4.], [0.,0.25,0.25,0.5,4.,-5.]])
 #plt.imshow(q)
@@ -76,7 +77,7 @@ q_new = Newton_Npoints.Newton_N(k, 1,0)
 #%%
 #for j in np.arange(10,200, step=10):
 #    arrays_qq = []
-#    for i in range(100):
+#    for i in range(10):
 #        
 #        arrays_qq.append(obtain_q(j,0.15))
 ##    
@@ -109,16 +110,16 @@ def find_error(infgen,tau_max=2, step=1, dim=50):
 #alpha, q_NEW = compare_eigenspace(k, q)
 #%%
  #test for statistics of error with these parameters
-#
-for k in [10,12]:
-    for j in np.arange(10,200, step=10):
-        load_file = np.load("data_infgen_dim%(dim)d_s015.npz"%{'dim':j}, allow_pickle=True)
-        arrays = []
-        for i in range(100):
-            res = find_error(load_file["arr_%d"%i],k,1,j)
-            arrays.append(res)
-    #    
-        np.savez("test_deg%(deg)d_dim%(dim)d_s015"%{'deg':k,'dim':j}, *arrays)
+##
+#for k in [2,3,4,5,6,7,8,10,12]:
+#    for j in np.arange(10,200, step=10):
+#        load_file = np.load("data_infgen_dim%(dim)d_s015.npz"%{'dim':j}, allow_pickle=True)
+#        arrays = []
+#        for i in range(10):
+#            res = find_error(load_file["arr_%d"%i],k,1,j)
+#            arrays.append(res)
+#    #    
+#        np.savez("test_deg%(deg)d_dim%(dim)d_s015"%{'deg':k,'dim':j}, *arrays)
 #    np.savez("test_deg%(deg)d_dim%(dim)d_s015"%{'deg':k, 'dim':j}, *arrays)
 
 #%%
