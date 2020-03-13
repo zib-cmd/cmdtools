@@ -26,11 +26,16 @@ from cmdtools.estimation import galerkin_taus_all, Newton_Npoints, picking_algor
 #%%
 #load trajectory    
 diala = np.load("arr_0.npy")
-#centers= np.loadtxt("./Kmean_diala150.txt")
-centers = picking_algorithm.picking_algorithm(diala[::200,:], 200)[1]
+centers= np.loadtxt("p_a_451centers.txt")
+#centers = picking_algorithm.picking_algorithm(diala[::25,:], 350)[1]
 #%%
+#something = picking_algorithm.picking_algorithm(diala[::25,:], 450)[1]
+#np.savetxt('p_a_351centers.txt', centers)
+#%%
+#np.savetxt('p_a_451centers.txt', something)
 plt.scatter( diala[::100, 0], diala[::100, 1])
 plt.scatter(centers[:, 0], centers[:, 1])
+plt.show()
 #%%
 centers= centers[centers[:, 0].argsort()]
 #sigma_list = np.loadtxt("sigmas_10to90_randomuniform.txt")
@@ -47,7 +52,7 @@ centers= centers[centers[:, 0].argsort()]
 #%%
 # estimate with Galerkin discretization the transfer operator
 #estimate 
-Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala[::10,:], centers, 0.1, 4)
+Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala[::5,:], centers, 0.1, 4)
 #%%
 def strip_bad(counts_tensor):
     """Find the lines in which the selfoverlap of the basis functions is not 
@@ -88,7 +93,7 @@ plt.show()
 #%%
 #estimate generator
 
-Infgen = Newton_Npoints.Newton_N(Koopman_mtx2, 1., 0)
+Infgen = Newton_Npoints.Newton_N(Koopman_mtx2[:4], 1., 0)
 chi_infgen= pcca.pcca(Infgen,4, S_)
 
 #%%
@@ -108,7 +113,20 @@ chi_infgen= pcca.pcca(Infgen,4, S_)
     
 #
 #%%
+plt.figure(figsize=(10, 4))
+plt.subplot(121)
+colors = ["b","r","gold","g", "m", "purple"]
+centers_1 = centers[centers_kept, :]
+#plt.hist2d(diala[:,0],diala[:,1], 100)
+for i in range(np.shape(chi_infgen)[0]):
+    #print(colors[np.argmax(chi[i,:])])
+    plt.scatter(centers_1[i, 0], centers_1[i, 1], color = colors[np.argmax(chi_infgen[i, :])])
+plt.xlabel("$\Phi$ [rad]")
+plt.ylabel("$\Psi$ [rad]")
+plt.title("Alanine Dipeptide, 4 Metastable States, $Q^c$")
+plt.xlim(-np.pi, np.pi)
 
+plt.subplot(122)
 colors = ["b","r","gold","g", "m", "purple"]
 centers_1 = centers[centers_kept, :]
 #plt.hist2d(diala[:,0],diala[:,1], 100)
@@ -117,7 +135,7 @@ for i in range(np.shape(chi_infgen)[0]):
     plt.scatter(centers_1[i, 0], centers_1[i, 1], color = colors[np.argmax(chi[i, :])])
 plt.xlabel("$\Phi$ [rad]")
 plt.ylabel("$\Psi$ [rad]")
-plt.title("Alanine Dipeptide, 4 Metastable States")
+plt.title("Alanine Dipeptide, 4 Metastable States, $K^c$")
 plt.xlim(-np.pi, np.pi)
 plt.show()
 #%%
@@ -126,3 +144,4 @@ Q_c = np.linalg.pinv(chi_infgen).dot(Infgen.dot(chi_infgen))
 #%%
 print(np.round(Q_c, 3))
 #plt.scatter(diala[:,0],diala[:,1], marker = ".")
+#%%
