@@ -19,5 +19,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=['numpy', 'scipy'],
-    extras_require={'krylovschur': ['petsc4py', 'slepc4py']}
+    extras_require={'slepc': ['petsc4py', 'slepc4py']}
 )
