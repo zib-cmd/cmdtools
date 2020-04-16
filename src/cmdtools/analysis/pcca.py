@@ -17,7 +17,7 @@ def schurvects(T, n, massmatrix=None):
 
     v_in  = np.real(e[-n])
     v_out = np.real(e[-(n + 1)])
-    #print(np.real(e))
+    
     # do not seperate conjugate eigenvalues
     assert not np.isclose(v_in, v_out), \
         "Cannot seperate conjugate eigenvalues, choose another n"
@@ -30,7 +30,7 @@ def schurvects(T, n, massmatrix=None):
         _, X, _ = schur(T, sort=lambda x: np.real(x) > cutoff)
     else:
         _, _, _, _, _, X = \
-            ordqz(T, massmatrix, sort=lambda a,b: sortqz(a,b,cutoff))
+            ordqz(T, massmatrix, sort=lambda a,b: np.real(a / b) > cutoff)
 	
     X = X[:, 0:n]  # use only first n vectors
 
@@ -39,9 +39,7 @@ def schurvects(T, n, massmatrix=None):
     i = np.argmax(np.abs(np.sum(X, axis=0)))
     X[:, i] = X[:, 0]
     X[:, 0] = 1
-
+    #return selected Schurvecs and sorted values
     return X, e
 
-def sortqz(a,b,cutoff):
-    #print(b)
-    return np.real(a / b) > cutoff
+

@@ -52,7 +52,7 @@ centers= centers[centers[:, 0].argsort()]
 #%%
 # estimate with Galerkin discretization the transfer operator
 #estimate 
-Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala[::5,:], centers, 0.1, 4)
+Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala[::5,:], centers, 0.01, 4)
 #%%
 def strip_bad(counts_tensor):
     """Find the lines in which the selfoverlap of the basis functions is not 

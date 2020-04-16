@@ -1,35 +1,20 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Nov 25 15:37:32 2019
 
-@author: bzfsechi
-"""
-#from cmdtools.src import cmdtools.estimation.galerkin
-#import cmdtools.analysis
-
+#standard libraries
 import numpy as np
-
-#from scipy import linalg
-#from scipy.spatial import distance
-
 import matplotlib.pyplot as plt
+#from cmdtools
 from cmdtools.analysis import pcca
 
 from cmdtools.estimation import galerkin_taus_all, Newton_Npoints, picking_algorithm
 
 
-#from cluster_by_isa import find_new_Q
-# Considering your module contains a function called my_func, you could import it:
-#from lalala import counttransition_trjs,set_rate_matrix
-#from SRSchur import sort_real_schur
-#%%
 #load trajectory    
 diala = np.load("arr_0.npy")
 centers= np.loadtxt("p_a_351centers.txt")
+#alternatively, use the picking agorithm for set your preferences.
+#to try the function, 
 #centers = picking_algorithm.picking_algorithm(diala[::25,:], 350)[1]
 #%%
-#something = picking_algorithm.picking_algorithm(diala[::25,:], 450)[1]
 #np.savetxt('p_a_351centers.txt', centers)
 #%%
 #np.savetxt('p_a_451centers.txt', something)
