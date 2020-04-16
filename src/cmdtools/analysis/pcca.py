@@ -4,12 +4,12 @@ from .optimization import inner_simplex_algorithm, optimize
 
 
 def pcca(T,  n, massmatrix = None):
-    X = schurvects(T, n, massmatrix)
+    X,e = schurvects(T, n, massmatrix)
     A = inner_simplex_algorithm(X)
     if n > 2:
         A = optimize(X, A)
     chi = X.dot(A)
-    return chi
+    return chi, e
 
 
 def schurvects(T, n, massmatrix=None):
@@ -40,7 +40,7 @@ def schurvects(T, n, massmatrix=None):
     X[:, i] = X[:, 0]
     X[:, 0] = 1
 
-    return X
+    return X, e
 
 def sortqz(a,b,cutoff):
     #print(b)
