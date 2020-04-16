@@ -12,14 +12,19 @@ from cmdtools.estimation import galerkin_taus_all, Newton_Npoints, picking_algor
 diala = np.load("arr_0.npy")
 centers= np.loadtxt("p_a_351centers.txt")
 #alternatively, use the picking agorithm for set your preferences.
-#to try the function, 
+#uncomment to try the function, 
 #centers = picking_algorithm.picking_algorithm(diala[::25,:], 350)[1]
-#%%
 #np.savetxt('p_a_351centers.txt', centers)
 #%%
 #np.savetxt('p_a_451centers.txt', something)
-plt.scatter( diala[::100, 0], diala[::100, 1])
-plt.scatter(centers[:, 0], centers[:, 1])
+plt.scatter( diala[::25, 0], diala[::25, 1], label= "diala traj")
+plt.scatter(centers[:, 0], centers[:, 1], label= "centers")
+plt.xlabel("$\Phi$ [rad]")\n",
+plt.ylabel("$\Psi$ [rad]")\n",
+plt.title("Dialanine and centers of the Gaussians")
+plt.xlim(-np.pi, np.pi)
+plt.ylim(-np.pi, np.pi)
+plt.legend()
 plt.show()
 #%%
 centers= centers[centers[:, 0].argsort()]
