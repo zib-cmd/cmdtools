@@ -12,9 +12,7 @@ from cmdtools.estimation.Newton_Npoints import Newton_N
 
 
 def test_Newton():
-    
-    
-    tensor= np.random.randint(0,10, size = (4,4,4))
+    tensor = np.random.randint(0,10, size=(4,4,4))
     diff_tensor=np.zeros((4,4,4))
         
     diff_tensor[0,:,:] = 1/(6.) *(-11*tensor[0,:,:]+18*tensor[1,:,:]-9*tensor[2,:,:]+2*tensor[3,:,:])
@@ -31,6 +29,4 @@ def test_Newton():
         
         applied_Newton[i] = Newton_N(tensor,1., i)
     
-    assert np.alltrue((np.round(diff_tensor,5)== np.round(applied_Newton,5)))
-
-
+    assert np.alltrue((np.round(diff_tensor,5)== np.round(applied_Newton, 5)))
