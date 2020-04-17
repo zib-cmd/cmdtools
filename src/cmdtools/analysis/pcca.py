@@ -21,12 +21,10 @@ def pcca(T, n):
 
 def schurvects(T, n):
     if USE_SLEPC:
-        K = krylovschur(T, n)
-        # TODO: Document necessity of following line
-        K[:, 0] = 1
-        return K
+        X = krylovschur(T, n)
     else:
-        return scipyschur(T, n)
+        X = scipyschur(T, n)
+    return normalizeschur(X)
 
 
 def scipyschur(T, n, massmatrix=None):
@@ -49,16 +47,7 @@ def scipyschur(T, n, massmatrix=None):
         _, _, _, _, _, X = \
             ordqz(T, massmatrix, sort=lambda a, b: np.real(a / b) > cutoff)
 
-    X = X[:, 0:n]  # use only first n vectors
-
-    # TODO: Document this
-    # move constant vector to the front, make it 1
-    X /= np.linalg.norm(X, axis=0)
-    i = np.argmax(np.abs(np.sum(X, axis=0)))
-    X[:, i] = X[:, 0]
-    X[:, 0] = 1
-
-    return X
+    return X[:, 0:n]  # use only first n vectors
 
 
 def krylovschur(A, n):
@@ -72,18 +61,17 @@ def krylovschur(A, n):
     E.setWhichEigenpairs(E.Which.LARGEST_REAL)
     E.solve()
     X = np.column_stack([x.array for x in E.getInvariantSubspace()])
-    # this seems to do the same as scipy.schur, but if too many converge the
-    # space is too big
-    # cuting off seems to work, but we dont really know
-    """
-    nconv = E.getConverged()
-    Y = np.zeros([np.shape(A)[0],nconv])
-    #print(nconv)
-    v, w = M.getVecs()
-    for i in range(E.getConverged()):
-        #print(E.getEigenvalue(i))
-        E.getEigenpair(i, v, w)
-        #print(v.array)
-        Y[:,i] = v.array
-    """
     return X[:, :n]
+
+
+def normalizeschur(X):
+    # find the constant eigenvector corresponding to ev. 1,
+    # move it to the front and set it to 1
+    # as required by the optimization routine
+
+    X /= np.linalg.norm(X, axis=0)
+    i = np.argmax(np.abs(np.sum(X, axis=0)))
+    X[:, i] = X[:, 0]
+    X[:, 0] = 1  # TODO: check if this column is indeed constant
+
+    return X
