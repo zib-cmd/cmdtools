@@ -6,7 +6,7 @@
 # This tutorial shows you how to compute the infinitesimal generator with the Newton's polynomial extrapolation.<br\>
 # First, load the modules we need. In addition to numpy and matplolib, we use the picking algorithm, Galerkin discretization for different lagtimes, Newton extrapolation, pcca+.
 
-# In[1]:
+
 
 
 #standard libraries
@@ -14,12 +14,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from cmdtools
 from cmdtools.analysis import pcca
-from cmdtools.estimation import galerkin_taus_all, Newton_Npoints, picking_algorithm
+from cmdtools.estimation import galerkin_taus_all, Newton_Npoints, picking_algorithm, centers_select_criteria
 
 
 # Load the trajectory data from  the directory and the centers for the Gaussian membership fuctions computed with the picking algorithm.<br\> We load the coordinates of the centers to make this tutorial faster. In case you want to vary the number of centers or to try by yourself how this algorthm works, uncomment the line below and comment the line that loads the centers coordinates. The picking algorithm requires a bit of time and we suggest you save the coordinates of your centers. 
 
-# In[2]:
 
 
 #load trajectory  and centres  
@@ -35,7 +34,7 @@ centers= centers[centers[:, 0].argsort()]
 # We visualize the position of the picked points in the state space.<br\>
 # You can see that this algorithm ensures that the sampling is localized in the region of of the state space covered by the trajectory. 
 
-# In[3]:
+
 
 
 plt.scatter( diala[::25, 0], diala[::25, 1], label= "diala traj")
@@ -53,47 +52,29 @@ plt.show()
 # We compute then the transfer matrix for $0,1,2,3,4$ times $\tau$. We save it in a numpy array, whose first index $n$ indicates the $n\cdot \tau$ tagtime used to compute the Koopman matrix $K(n\cdot \tau)$. <br\>
 # We set the parameter $\sigma$ for the variance of the Gaussian to $\sigma=0.09$. 
 
-# In[4]:
+
 
 
 Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala[::5,:], centers, 0.09, 4)
 
 
-# In[5]:
+# With small numbers can be tricky, above all when normalizing. <br\>
+# That causes that in the first matrix $K(\tau=0)$, the diagonal entry has not the biggest value. <br\> 
+# This would mean that the observable "without moving" would most likely end up in a new region. This does not make sense and is just a numerical artefact.
+#  Our solution is to remove all the centers associated with this problem. <br\>
+# To facilitate the readibility, we define $S\_$ = $K(\tau=0)$. 
+# The $S\_$ matrix stores the so called mass matrix. This matrix is the overlap of the basis functions.  In order to account for "phantom transitions" induced merely by
+# this overlap and not the underlying dynamics, we pass this (optional) matrix to the pcca routine.
+# 
 
 
 
-#%%
-def strip_bad(counts_tensor):
-    """Find the lines in which the selfoverlap of the basis functions is not 
-    good, strip those basis points from the computed transition matrix. 
-    Input:
-        
-    Output:
-        """
-    S = counts_tensor[0,:,:]
-    to_keep = []
-    for i in range(np.shape(S)[0]):
-        #if np.argmax(S[i,:]) == i:
-        if S[i,i] > 0.2:
-            to_keep.append(i)
-                      
-    #for j in range(np.shape(counts_tensor)[0]):
-     #   counts_tensor[j,:,:] = utils.rowstochastic(counts_tensor[j,:,:])  
-    temp = counts_tensor[:,to_keep,:]
-    return temp [:,:,to_keep], to_keep
-#%%
-Koopman_mtx2, centers_kept = strip_bad(Koopman_mtx)
-#%%
-for k in range(5):
-    Koopman_mtx2[k, :, :] = Koopman_mtx2[k, :, :]/np.sum(Koopman_mtx2[k, :, :], axis = 1)
-    #%%
+
+Koopman_mtx2, centers_kept = centers_select_criteria.centers_selection(Koopman_mtx)
 S_ = Koopman_mtx2[0, :, :]
 
 
 # Now we can apply the Newton's polynomial extrapolation method to the set of Koopman matrices that we computed.
-
-# In[6]:
 
 
 #estimate generator
@@ -104,7 +85,7 @@ Infgen = Newton_Npoints.Newton_N(Koopman_mtx2[:4], 1., 0)
 # Last step: the dominant spectrum of the Koopman matrix $K(\tau)$ and of the generator $Q$ is used as input for PCCA+. <br\> This version of PCCA+ uses the Schur projection of the input matrix to computed the coarse graied dynamics. <br\> We also use a matrix .................................MASS MATRIX CONTINUE.................We observed obseved 4 clusters from an analysis of the Schurvalues, but you can try to vary the number of clusters and see how the results change.
 # 
 
-# In[7]:
+
 
 
 chi, sorted_ew_k = pcca.pcca(Koopman_mtx2[1, :, :], 4, S_)
@@ -118,7 +99,6 @@ plt.colorbar()
 plt.show()
 
 
-# In[8]:
 
 
 chi_infgen, sorted_ew_q= pcca.pcca(Infgen,4, S_)
@@ -132,7 +112,7 @@ plt.ylabel("center (enumerated)")
 plt.show()
 
 
-# In[9]:
+
 
 
 
@@ -162,7 +142,6 @@ plt.show()
 
 # The coarse grained generator can be obtained with $Q^c=\chi^{-1}Q\chi$
 
-# In[10]:
 
 
 Q_c = np.linalg.pinv(chi_infgen).dot(Infgen.dot(chi_infgen))
