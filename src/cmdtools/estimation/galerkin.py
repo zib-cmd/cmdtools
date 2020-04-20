@@ -21,27 +21,26 @@ def get_membership(timeseries, centers, sigma):
     return utils.rowstochastic(gausskernels)
 
 
-
-def find_bandwidth(timeseries, centers, percentile=50): #, plot= True):
+def find_bandwidth(timeseries, centers, percentile=50):  # , plot= True):
     """Find the bandwidth of the Gaussian based on: 
-     
+
     "Stein Variational Gradient Descent: 
     A General Purpose Bayesian Inference Algorithm", 
     Qiang Liu and Dilin Wang (2016).
-    
+
      Based on the value of the percentile is possible to decide the points to
      take into consideration for the determination of the bandwidth.
-     
+
     Input:
         timeseries: arr, trajectory, each row is a collection of coordinates at a
             different timestep
         centers: arr, centers of the Gaussians, each row has the coordinates 
             of a different center
         percentile: int [0,100], default value = 50
-        
+
      Output:
          sigma: float, the  variance of the Gaussian"""
-         
+
     no_centers = np.shape(centers)[0]
     sqdist = distance.cdist(timeseries, centers, distance.sqeuclidean)
 
@@ -55,6 +54,5 @@ def find_bandwidth(timeseries, centers, percentile=50): #, plot= True):
 #        plt.legend()
 #        plt.show()
 
-# since we have h = perc**2/log(n) = 2 * sigma**2 
-    return np.percentile(sqdist,percentile)/ np.sqrt(2*np.log(no_centers)) 
-         
+# since we have h = perc**2/log(n) = 2 * sigma**2
+    return np.percentile(sqdist, percentile) / np.sqrt(2*np.log(no_centers))

@@ -2,13 +2,11 @@ import numpy as np
 import copy
 
 
-
 def factorial(n):
     if n == 0:
         return 1
     else:
         return n * factorial(n-1)
-
 
 
 def div_diff(P):
@@ -20,22 +18,23 @@ def div_diff(P):
         P= tensor
     Output: 
         tensor containing the divided differences values."""
-    t=int(np.shape(P)[0])
-    n=int(np.shape(P)[1])
-    D=np.zeros((t,t,n,n))
-    D[:,0,:,:]=copy.deepcopy(P)
-    d=1
+    t = int(np.shape(P)[0])
+    n = int(np.shape(P)[1])
+    D = np.zeros((t, t, n, n))
+    D[:, 0, :, :] = copy.deepcopy(P)
+    d = 1
     for j in range(t-1):
-        for i in range(j+1,t):
-            
-            D[i,j+1,:,:]=(D[i,j,:,:]-D[i-1,j,:,:])
+        for i in range(j+1, t):
 
-            d+=1
-    
-    return  np.transpose(np.reshape(np.transpose(D.diagonal(0,0,1)), (t,n,n)), axes=(0,2,1))#,D
+            D[i, j+1, :, :] = (D[i, j, :, :]-D[i-1, j, :, :])
+
+            d += 1
+
+    # ,D
+    return np.transpose(np.reshape(np.transpose(D.diagonal(0, 0, 1)), (t, n, n)), axes=(0, 2, 1))
 
 
-def Newton_N(B,h, x):
+def Newton_N(B, h, x):
     """Function for computing the transition rate matrix at the point x from the 
     time series of the transition probability matrix (contained in the vector B)
     with the discretization contant h. 
@@ -43,8 +42,8 @@ def Newton_N(B,h, x):
     point x.    The programmed formula is the one in paragraph 13.2 of
     "Formelsammlung for numerische Mathematik in C-Programming",
     Engeln-Muellges, Reutter, SI Wissenschaftsverlag, 1990.
-    
-    
+
+
     Input:
     B=tensor
     h=float,step size
@@ -52,40 +51,37 @@ def Newton_N(B,h, x):
     Output:
         matrix representing the values of the polynomial at the point x(2d-
         array)"""
-    Deltas=div_diff(B)
-    n_prime=int(np.shape(B)[0])
-    x=int(x)
-    big_pi=1.
-    sigma_fin=0.
-    big_sigma=0.
-    
-     
+    Deltas = div_diff(B)
+    n_prime = int(np.shape(B)[0])
+    x = int(x)
+    big_pi = 1.
+    sigma_fin = 0.
+    big_sigma = 0.
+
     for j in range(n_prime):
-        big_sigma=0.        
-    
-        for k in range(0,j):
-            #print("k",k,"j")
-            big_pi=1.
-            for i in range(0,j):
-                #print
-                if i==k:
+        big_sigma = 0.
+
+        for k in range(0, j):
+            # print("k",k,"j")
+            big_pi = 1.
+            for i in range(0, j):
+                # print
+                if i == k:
                     continue
                 else:
-                    big_pi*=(x-i)
-            big_sigma+=big_pi
-           
-            
-        sigma_fin+= big_sigma*Deltas[j]/np.float16(factorial(j))
-   
+                    big_pi *= (x-i)
+            big_sigma += big_pi
+
+        sigma_fin += big_sigma*Deltas[j]/np.float16(factorial(j))
+
     return(sigma_fin/h)
 
 
-
-def Newton2(B,h,x):
+def Newton2(B, h, x):
     """Make sure that the sum of the entries of each row of the generator 
     matrix is zero. To do it, it apply the function Newton_N and then make the 
     sum of each row equal zero.
-    
+
     Input:
     B=tensor
     h= float,step size
@@ -94,10 +90,7 @@ def Newton2(B,h,x):
         matrix representing the values of the polynomial at the point x(2d-
         array)
         """
-    diff=copy.deepcopy(Newton_N(B,h,x))
+    diff = copy.deepcopy(Newton_N(B, h, x))
     for j in range(diff.shape[1]):
-            diff[j,j]=-(np.sum(diff[j,:])-diff[j,j])
+        diff[j, j] = -(np.sum(diff[j, :])-diff[j, j])
     return(diff)
-
-
-
