@@ -8,6 +8,7 @@ def beta_to_epsilon(b):
 class DiffusionProcess:
     """ Representation of the diffusion process
     dX = -∇V(X) dt + √(2ε) dW """  # TODO: check if sqrt is right here
+
     def __init__(self, V, epsilon=1):
         self.V = V
         self.epsilon = epsilon
@@ -39,6 +40,7 @@ class DoubleWell(DiffusionProcess):
 class ThreeHolePotential(DiffusionProcess):
     """ The Three-Hole Potential from 2006 - Metzner, Schütte, Vanden-Eijnden -
     Illustration of transition path theory """
+
     def __init__(self):
         def potential(xy):
             x = xy[0]

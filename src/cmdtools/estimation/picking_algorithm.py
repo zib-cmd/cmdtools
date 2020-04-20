@@ -1,6 +1,8 @@
 
 import numpy as np
 import scipy.spatial.distance as dist
+
+
 def picking_list(d, n):
     """
     Picking algorithm (Durmaz, 2016)
@@ -13,8 +15,8 @@ def picking_list(d, n):
         Number of points to pick.    Returns
     -------
     inds : list[int]
-        List of indices of the chosen points.    """ 
-    
+        List of indices of the chosen points.    """
+
     d = d.copy()
     q1 = 0
     q2 = np.argmax(d[q1, :])
@@ -37,11 +39,8 @@ def picking_algorithm(traj, n):
          Trajectory coordinates  
     n = int
     Number of points to pick
-    
+
     """
     distances = dist.cdist(traj, traj, dist.sqeuclidean)
-    
-    return(traj, traj[picking_list(distances, n),:])
- 
 
-
+    return(traj, traj[picking_list(distances, n), :])
