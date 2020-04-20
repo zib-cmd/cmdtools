@@ -8,7 +8,6 @@
 
 
 
-
 #standard libraries
 import numpy as np
 import matplotlib.pyplot as plt
@@ -54,7 +53,6 @@ plt.show()
 
 
 
-
 Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala[::5,:], centers, 0.09, 4)
 
 
@@ -68,8 +66,6 @@ Koopman_mtx, m = galerkin_taus_all.propagator_tau(diala[::5,:], centers, 0.09, 4
 # 
 
 
-
-
 Koopman_mtx2, centers_kept = centers_select_criteria.centers_selection(Koopman_mtx)
 S_ = Koopman_mtx2[0, :, :]
 
@@ -77,16 +73,14 @@ S_ = Koopman_mtx2[0, :, :]
 # Now we can apply the Newton's polynomial extrapolation method to the set of Koopman matrices that we computed.
 
 
+
 #estimate generator
 
 Infgen = Newton_Npoints.Newton_N(Koopman_mtx2[:4], 1., 0)
 
 
-# Last step: the dominant spectrum of the Koopman matrix $K(\tau)$ and of the generator $Q$ is used as input for PCCA+. <br\> This version of PCCA+ uses the Schur projection of the input matrix to computed the coarse graied dynamics. <br\> We also use a matrix .................................MASS MATRIX CONTINUE.................We observed obseved 4 clusters from an analysis of the Schurvalues, but you can try to vary the number of clusters and see how the results change.
+# Last step: the dominant spectrum of the Koopman matrix $K(\tau)$ and of the generator $Q$ is used as input for PCCA+. <br\> This version of PCCA+ uses the Schur projection of the input matrix to computed the coarse graied dynamics. <br\> .We observed obseved 4 clusters from an analysis of the Schurvalues, but you can try to vary the number of clusters and see how the results change.
 # 
-
-
-
 
 chi, sorted_ew_k = pcca.pcca(Koopman_mtx2[1, :, :], 4, S_)
 #visualize pcca+ Koopman matrix 
@@ -99,8 +93,6 @@ plt.colorbar()
 plt.show()
 
 
-
-
 chi_infgen, sorted_ew_q= pcca.pcca(Infgen,4, S_)
 
 plt.imshow(chi_infgen, aspect= "auto")
@@ -110,8 +102,6 @@ plt.xticks(np.arange(0,np.shape(chi)[1]))
 plt.xlabel("Schurvalue")
 plt.ylabel("center (enumerated)")
 plt.show()
-
-
 
 
 
@@ -141,8 +131,6 @@ plt.show()
 
 
 # The coarse grained generator can be obtained with $Q^c=\chi^{-1}Q\chi$
-
-
 
 Q_c = np.linalg.pinv(chi_infgen).dot(Infgen.dot(chi_infgen))
 
