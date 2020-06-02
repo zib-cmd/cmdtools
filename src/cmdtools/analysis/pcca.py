@@ -22,8 +22,6 @@ def pcca(T, n):
 def schurvects(T, n):
     if USE_SLEPC:
         K = krylovschur(T, n)
-        # TODO: Document necessity of following line
-        K[:, 0] = 1
         return K
     else:
         return scipyschur(T, n)
@@ -51,12 +49,10 @@ def scipyschur(T, n, massmatrix=None):
 
     X = X[:, 0:n]  # use only first n vectors
 
-    # TODO: Document this
-    # move constant vector to the front, make it 1
+    # swap constant vector to the front, as required by inner simplex algorithm
     X /= np.linalg.norm(X, axis=0)
     i = np.argmax(np.abs(np.sum(X, axis=0)))
-    X[:, i] = X[:, 0]
-    X[:, 0] = 1
+    X[:, [0, i]] = X[:, [i, 0]]
 
     return X
 

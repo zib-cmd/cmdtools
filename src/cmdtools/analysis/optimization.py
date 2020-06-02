@@ -3,6 +3,15 @@ from scipy.optimize import fmin
 
 
 def inner_simplex_algorithm(X):
+
+    # the ISA algorithm assumes the first column to be the constant eigenvector
+    # which we construct by projection
+    proj = np.dot(np.ones(np.shape(X)[0]), X)
+    assert not(np.isclose(proj[0], 0))  # keep subspace of first column
+    X[:, 0] = np.dot(X, proj)
+
+    assert all(np.isclose(X[0, 0], X[:, 0]))
+    X[:, 0] = 1
     i = indexsearch(X)
     return np.linalg.inv(X[i, :])
 
