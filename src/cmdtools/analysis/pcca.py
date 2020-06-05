@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.linalg import schur, ordqz
 from .optimization import inner_simplex_algorithm, optimize
+import warnings
 
 # TODO: find a better solution to this
 try:
@@ -26,15 +27,23 @@ def schurvects(T, n):
         return scipyschur(T, n)
 
 
-def scipyschur(T, n, massmatrix=None):
+def scipyschur(T, n, massmatrix=None, onseperation="warn"):
     e = np.sort(np.linalg.eigvals(T))
 
     v_in  = np.real(e[-n])
     v_out = np.real(e[-(n + 1)])
 
     # do not seperate conjugate eigenvalues
-    assert not np.isclose(v_in, v_out), \
-        "Cannot seperate conjugate eigenvalues, choose another n"
+    if np.isclose(v_in, v_out):
+        msg = "Invalid number of clusters (splitting conjugate eigenvalues, choose another n)"
+        if onseperation == "warn":
+            warnings.warn(msg, RuntimeWarning)
+        elif onseperation == "continue":
+            pass
+        elif onseperation == "fix":
+            return scipyschur(T, n+1, massmatrix, "error")
+        else:
+            raise RuntimeError(msg)
 
     # determine the eigenvalue gap
     cutoff = (v_in + v_out) / 2
