@@ -1,19 +1,22 @@
 import numpy as np
 from scipy.optimize import fmin
 
+""" References:
+
+For the general optimization:
+Deuflhard, P. and Weber, M., 2005. Robust Perron cluster analysis in conformation dynamics. https://doi.org/10.1016/j.laa.2004.10.026
+For the objective function:
+Röblitz, S. and Weber, M., 2013. Fuzzy spectral clustering by PCCA+: https://doi.org/10.1007/s11634-013-0134-6
+"""
+
 
 def inner_simplex_algorithm(X):
-
-    # the ISA algorithm assumes the first column to be the constant eigenvector
-    # which we construct by projection
-    proj = np.dot(np.ones(np.shape(X)[0]), X)
-    assert not(np.isclose(proj[0], 0))  # keep subspace of first column
-    X[:, 0] = np.dot(X, proj)
-
-    assert all(np.isclose(X[0, 0], X[:, 0]))
-    X[:, 0] = 1
-    i = indexsearch(X)
-    return np.linalg.inv(X[i, :])
+    """
+    Return the transformation A mapping those rows of X
+    which span the largest simplex onto the unit simplex.
+    """
+    ind = indexsearch(X)
+    return np.linalg.inv(X[ind, :])
 
 
 def indexsearch(X):
@@ -40,17 +43,52 @@ def indexsearch(X):
     return ind
 
 
-def optimize(X, A, maxiter=1000):
-    if np.size(X, axis=1) > 1:
-        x = A[1:, 1:]
-        x = fmin(objective, x0=x, args=(X, A), maxiter=maxiter)
-        n = np.size(A, axis=1) - 1
-        A[1:, 1:] = x.reshape(n, n)
-        fillA(A, X)
+def optimize(X, A0, maxiter=1000):
+    """
+    find the optimal transformation A
+    such that the membership 𝛘 = XA is as crisp as possible
+    """
+    return _feasible_optimize(X, A0, maxiter)
+
+
+def _feasible_optimize(X, A0, maxiter):
+    """
+    Since the feasiblization routine fillA() in the actual optimization
+    requires the first column of X to be the one-vector.
+    We hence solve for the transformed problem 𝛘 = XA = (XT)(IA)
+    with T a matrix, I=T^-1 and (XT) has the required constant column.
+    """
+    n, m = np.shape(X)
+    T = np.identity(m)
+    T[:, 0] = np.dot(np.ones(n), X)
+    if np.isclose(T[0, 0], 0):
+        raise RuntimeError("X[:,1] must not be orthogonal to the one-vector")
+    tX = np.dot(X, T)
+    iA0 = np.linalg.inv(T).dot(A0)
+
+    iA = _optimize(tX, iA0, maxiter)
+
+    # invert the previous transformation
+    A = np.dot(T, iA)
+    return A
+
+
+def _optimize(X, A, maxiter):
+    """
+    optimization of A
+    note that the feasiblization routine fillA() requires
+    the first column of X to be the constant one-vector
+    """
+    x = A[1:, 1:]
+    x = fmin(objective, x0=x, args=(X, A), maxiter=maxiter)
+    n = np.size(A, axis=1) - 1
+    A[1:, 1:] = x.reshape(n, n)
+    fillA(A, X)
     return A
 
 
 def objective(alpha, X, A):
+    """ Equation (16) from Röblitz, Weber (2013) """
     n = np.size(X, axis=1) - 1
     A[1:, 1:] = alpha.reshape(n, n)
     fillA(A, X)
@@ -58,7 +96,10 @@ def objective(alpha, X, A):
 
 
 def fillA(A, X):
-    """ Converts the given matrix into a feasible transformation matrix. """
+    """
+    Converts the given matrix into a feasible transformation matrix.
+    Algorithm 3.10 from Weber (2006)
+    """
     A[1:, 0] = -np.sum(A[1:, 1:], axis=1)  # row-sum condition
     A[0, :]  = -np.min(X[:, 1:].dot(A[1:, :]), axis=0)  # maximality condition
     A /= np.sum(A[0, :])  # rescale to feasible set
