@@ -21,8 +21,7 @@ def pcca(T, n):
 
 def schurvects(T, n):
     if USE_SLEPC:
-        K = krylovschur(T, n)
-        return K
+        return krylovschur(T, n)
     else:
         return scipyschur(T, n)
 
@@ -47,14 +46,7 @@ def scipyschur(T, n, massmatrix=None):
         _, _, _, _, _, X = \
             ordqz(T, massmatrix, sort=lambda a, b: np.real(a / b) > cutoff)
 
-    X = X[:, 0:n]  # use only first n vectors
-
-    # swap constant vector to the front, as required by inner simplex algorithm
-    X /= np.linalg.norm(X, axis=0)
-    i = np.argmax(np.abs(np.sum(X, axis=0)))
-    X[:, [0, i]] = X[:, [i, 0]]
-
-    return X
+    return X[:, 0:n]  # use only first n vectors
 
 
 def krylovschur(A, n):
@@ -68,18 +60,4 @@ def krylovschur(A, n):
     E.setWhichEigenpairs(E.Which.LARGEST_REAL)
     E.solve()
     X = np.column_stack([x.array for x in E.getInvariantSubspace()])
-    # this seems to do the same as scipy.schur, but if too many converge the
-    # space is too big
-    # cuting off seems to work, but we dont really know
-    """
-    nconv = E.getConverged()
-    Y = np.zeros([np.shape(A)[0],nconv])
-    #print(nconv)
-    v, w = M.getVecs()
-    for i in range(E.getConverged()):
-        #print(E.getEigenvalue(i))
-        E.getEigenpair(i, v, w)
-        #print(v.array)
-        Y[:,i] = v.array
-    """
     return X[:, :n]
