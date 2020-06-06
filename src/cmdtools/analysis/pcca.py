@@ -36,9 +36,9 @@ def schurvects(T, n, pi=None):
     # Pb Xb = Xb S => PX = X S
     # Xb^T Xb = I  => X^T D X = I
 
-    D = np.diag(np.sqrt(pi))
+    Dh = np.diag(np.sqrt(pi))
     Di = np.diag(np.sqrt(1/pi))
-    Pb = D.dot(T).dot(Di)
+    Pb = Dh.dot(T).dot(Di)
 
     if USE_SLEPC:
         Xb = krylovschur(Pb, n)
@@ -46,8 +46,22 @@ def schurvects(T, n, pi=None):
         Xb = scipyschur(Pb, n)
 
     X = Di.dot(Xb)
-    X[:, 0] = X[:, 0] * np.sign(X[0, 0]) # fix sign of first column
+    X = gramschmidt(X, pi)
+    X[:, 0] = X[:, 0] * np.sign(X[0, 0])  # fix sign of first column
     assertstructure(X, pi)
+    return X
+
+
+def gramschmidt(X, pi):
+    X = np.copy(X)
+    D = np.diag(pi)
+    for i in range(np.size(X, 1)):
+        if i == 0:
+            X[:, 0] = 1
+        else:
+            for j in range(i):
+                X[:, i] -= X[:, i].dot(D).dot(X[:, j]) * X[:, j]
+            X[:, i] /= np.sqrt(X[:, i].dot(D).dot(X[:, i]))
     return X
 
 

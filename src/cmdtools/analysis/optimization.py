@@ -68,9 +68,6 @@ if False:
         return A
 
 
-
-
-
 def optimize(X, A, maxiter=1000):
     """
     optimization of A
