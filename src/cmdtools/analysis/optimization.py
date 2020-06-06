@@ -43,32 +43,7 @@ def indexsearch(X):
     return ind
 
 
-if False:
-    def oldoptimize(X, A0, maxiter=1000):
-        """
-        find the optimal transformation A
-        such that the membership 𝛘 = XA is as crisp as possible
-        """
-        return _feasible_optimize(X, A0, maxiter)
-
-    def _feasible_optimize(X, A0, maxiter):
-        """
-        Since the feasiblization routine fillA() in the actual optimization
-        requires the first column of X to be the one-vector.
-        We hence solve for the transformed problem 𝛘 = XA = (XT)(IA)
-        with T a matrix, I=T^-1 and (XT) has the required constant column.
-        """
-
-        iA0 = np.linalg.inv(T).dot(A0)
-
-        iA = _optimize(tX, iA0, maxiter)
-
-        # invert the previous transformation
-        A = np.dot(T, iA)
-        return A
-
-
-def optimize(X, A, maxiter=1000):
+def optimize(X, A, pi, maxiter=1000):
     """
     optimization of A
     - the feasiblization routine fillA() requires
@@ -76,12 +51,21 @@ def optimize(X, A, maxiter=1000):
     - the optimzation criterion expects X^T D X = I
     (where D is the stationary diagonal matrix)
     """
+    assertstructure(X, pi)
     x = A[1:, 1:]
     x = fmin(objective, x0=x, args=(X, A), maxiter=maxiter)
     n = np.size(A, axis=1) - 1
     A[1:, 1:] = x.reshape(n, n)
     fillA(A, X)
     return A
+
+
+def assertstructure(X, pi):
+    I = np.identity(np.size(X, 1))
+    D = np.diag(pi)
+    XTDX = X.T.dot(D).dot(X)
+    assert np.all(np.isclose(X[:, 0], 1))
+    assert np.all(np.isclose(XTDX - I, 0))
 
 
 def objective(alpha, X, A):

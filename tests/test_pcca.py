@@ -27,12 +27,14 @@ def test_example_n3():
 
 def test_schurvects(n=10, m=4):
     T = utils.randompropagator(n, reversible=False)
-    pcca.schurvects(T, m)
+    pi = utils.get_pi(T, "uniform")
+    pcca.schurvects(T, m, pi)
 
 
 def test_schurvects_generalized(n=10, m=3):
     T = utils.randompropagator(n)
-    X1 = pcca.schurvects(T, m)
+    pi = utils.get_pi(T, "uniform")
+    X1 = pcca.schurvects(T, m, pi)
     X2 = pcca.scipyschur(T, m, massmatrix=np.diag(np.ones(n)))
 
     # check if X1 and X2 span the same space

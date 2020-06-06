@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.linalg import schur, ordqz
 from .optimization import inner_simplex_algorithm, optimize
+from ..utils import get_pi
 import warnings
 
 # TODO: find a better solution to this
@@ -11,66 +12,47 @@ except ImportError:
     USE_SLEPC = False
 
 
-def pcca(T, n, pi=None):
+def pcca(T, n, pi="uniform"):
+    pi = get_pi(T, pi)
     X = schurvects(T, n, pi)
     A = inner_simplex_algorithm(X)
     if n > 2:
-        A = optimize(X, A)
+        A = optimize(X, A, pi)
     chi = X.dot(A)
     return chi
 
 
-def schurvects(T, n, pi=None):
+def schurvects(T, n, pi):
     """
     compute the leading n schurvectors X
     wrt. the scalar product induced by pi
     (i.e. X^T D X = I with D=diag(pi))
     """
-    if pi is None:
-        dim = np.size(T, 1)
-        pi = np.full(dim, 1/dim)
-
-    # Solve the transformed problem
-    # Xb = schur(Pb)
-    # Pb = D^1/2 P D^-1/2, X = D^-1/2 Xb
-    # Pb Xb = Xb S => PX = X S
-    # Xb^T Xb = I  => X^T D X = I
-
-    Dh = np.diag(np.sqrt(pi))
-    Di = np.diag(np.sqrt(1/pi))
-    Pb = Dh.dot(T).dot(Di)
 
     if USE_SLEPC:
-        Xb = krylovschur(Pb, n)
+        X = krylovschur(T, n)
     else:
-        Xb = scipyschur(Pb, n)
+        X = scipyschur(T, n)
 
-    X = Di.dot(Xb)
     X = gramschmidt(X, pi)
-    X[:, 0] = X[:, 0] * np.sign(X[0, 0])  # fix sign of first column
-    assertstructure(X, pi)
     return X
 
 
 def gramschmidt(X, pi):
+    """Gram Schmidt orthogonalization wrt. scalar product induced by pi"""
     X = np.copy(X)
     D = np.diag(pi)
     for i in range(np.size(X, 1)):
         if i == 0:
+            if np.isclose(np.dot(X[:, 0], np.full(np.size(X, 0), 1)), 0):
+                # this should not happen, if so we have to swap columns
+                raise RuntimeError("First column is orthogonal to 1-Vector")
             X[:, 0] = 1
         else:
             for j in range(i):
                 X[:, i] -= X[:, i].dot(D).dot(X[:, j]) * X[:, j]
             X[:, i] /= np.sqrt(X[:, i].dot(D).dot(X[:, i]))
     return X
-
-
-def assertstructure(X, pi):
-    I = np.identity(np.size(X, 1))
-    D = np.diag(pi)
-    XTDX = X.T.dot(D).dot(X)
-    assert np.all(np.isclose(X[:, 0], 1))
-    assert np.all(np.isclose(XTDX - I, 0))
 
 
 def scipyschur(T, n, massmatrix=None, onseperation="warn"):
