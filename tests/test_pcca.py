@@ -45,8 +45,8 @@ def test_krylovschur(n=30, m=5, N=100):
         for i in range(N):
             A = utils.randompropagator(n, reversible=False)
             try:
-                S = pcca.scipyschur(A, m)
-            except AssertionError:
+                S = pcca.scipyschur(A, m, onseperation="error")
+            except RuntimeError:
                 continue
             K = pcca.krylovschur(A, m)
             R = np.linalg.matrix_rank(np.concatenate([S, K], axis=1), tol=1e-6)

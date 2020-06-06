@@ -11,8 +11,8 @@ except ImportError:
     USE_SLEPC = False
 
 
-def pcca(T, n):
-    X = schurvects(T, n)
+def pcca(T, n, pi=None):
+    X = schurvects(T, n, pi)
     A = inner_simplex_algorithm(X)
     if n > 2:
         A = optimize(X, A)
@@ -20,11 +20,43 @@ def pcca(T, n):
     return chi
 
 
-def schurvects(T, n):
+def schurvects(T, n, pi=None):
+    """
+    compute the leading n schurvectors X
+    wrt. the scalar product induced by pi
+    (i.e. X^T D X = I with D=diag(pi))
+    """
+    if pi is None:
+        dim = np.size(T, 1)
+        pi = np.full(dim, 1/dim)
+
+    # Solve the transformed problem
+    # Xb = schur(Pb)
+    # Pb = D^1/2 P D^-1/2, X = D^-1/2 Xb
+    # Pb Xb = Xb S => PX = X S
+    # Xb^T Xb = I  => X^T D X = I
+
+    D = np.diag(np.sqrt(pi))
+    Di = np.diag(np.sqrt(1/pi))
+    Pb = D.dot(T).dot(Di)
+
     if USE_SLEPC:
-        return krylovschur(T, n)
+        Xb = krylovschur(Pb, n)
     else:
-        return scipyschur(T, n)
+        Xb = scipyschur(Pb, n)
+
+    X = Di.dot(Xb)
+    X[:, 0] = X[:, 0] * np.sign(X[0, 0]) # fix sign of first column
+    assertstructure(X, pi)
+    return X
+
+
+def assertstructure(X, pi):
+    I = np.identity(np.size(X, 1))
+    D = np.diag(pi)
+    XTDX = X.T.dot(D).dot(X)
+    assert np.all(np.isclose(X[:, 0], 1))
+    assert np.all(np.isclose(XTDX - I, 0))
 
 
 def scipyschur(T, n, massmatrix=None, onseperation="warn"):
@@ -58,7 +90,12 @@ def scipyschur(T, n, massmatrix=None, onseperation="warn"):
     return X[:, 0:n]  # use only first n vectors
 
 
-def krylovschur(A, n):
+def krylovschur(A, n, massmatrix=None, onseperation="continue"):
+    if massmatrix is not None:
+        raise NotImplementedError
+    if onseperation != "continue":
+        raise NotImplementedError
+
     from petsc4py import PETSc
     from slepc4py import SLEPc
     M = PETSc.Mat().create()
@@ -70,3 +107,26 @@ def krylovschur(A, n):
     E.solve()
     X = np.column_stack([x.array for x in E.getInvariantSubspace()])
     return X[:, :n]
+
+
+def normalizeschur(X):
+    # find the constant eigenvector corresponding to ev. 1,
+    # move it to the front and set it to 1
+    # as required by the optimization routine
+
+    X /= np.linalg.norm(X, axis=0)
+    i = np.argmax(np.abs(np.sum(X, axis=0)))
+    X[:, i] = X[:, 0]
+    X[:, 0] = 1  # TODO: check if this column is indeed constant
+
+    return X
+
+
+def normalizeschur2(X):
+    n, m = np.shape(X)
+    T = np.identity(m)
+    T[:, 0] = np.dot(np.ones(n)/np.sqrt(n), X)
+    if np.isclose(T[0, 0], 0):
+        raise RuntimeError("X[:,1] must not be orthogonal to the one-vector")
+    tX = np.dot(X, T)
+    return tX

@@ -43,41 +43,41 @@ def indexsearch(X):
     return ind
 
 
-def optimize(X, A0, maxiter=1000):
-    """
-    find the optimal transformation A
-    such that the membership 𝛘 = XA is as crisp as possible
-    """
-    return _feasible_optimize(X, A0, maxiter)
+if False:
+    def oldoptimize(X, A0, maxiter=1000):
+        """
+        find the optimal transformation A
+        such that the membership 𝛘 = XA is as crisp as possible
+        """
+        return _feasible_optimize(X, A0, maxiter)
+
+    def _feasible_optimize(X, A0, maxiter):
+        """
+        Since the feasiblization routine fillA() in the actual optimization
+        requires the first column of X to be the one-vector.
+        We hence solve for the transformed problem 𝛘 = XA = (XT)(IA)
+        with T a matrix, I=T^-1 and (XT) has the required constant column.
+        """
+
+        iA0 = np.linalg.inv(T).dot(A0)
+
+        iA = _optimize(tX, iA0, maxiter)
+
+        # invert the previous transformation
+        A = np.dot(T, iA)
+        return A
 
 
-def _feasible_optimize(X, A0, maxiter):
-    """
-    Since the feasiblization routine fillA() in the actual optimization
-    requires the first column of X to be the one-vector.
-    We hence solve for the transformed problem 𝛘 = XA = (XT)(IA)
-    with T a matrix, I=T^-1 and (XT) has the required constant column.
-    """
-    n, m = np.shape(X)
-    T = np.identity(m)
-    T[:, 0] = np.dot(np.ones(n), X)
-    if np.isclose(T[0, 0], 0):
-        raise RuntimeError("X[:,1] must not be orthogonal to the one-vector")
-    tX = np.dot(X, T)
-    iA0 = np.linalg.inv(T).dot(A0)
-
-    iA = _optimize(tX, iA0, maxiter)
-
-    # invert the previous transformation
-    A = np.dot(T, iA)
-    return A
 
 
-def _optimize(X, A, maxiter):
+
+def optimize(X, A, maxiter=1000):
     """
     optimization of A
-    note that the feasiblization routine fillA() requires
+    - the feasiblization routine fillA() requires
     the first column of X to be the constant one-vector
+    - the optimzation criterion expects X^T D X = I
+    (where D is the stationary diagonal matrix)
     """
     x = A[1:, 1:]
     x = fmin(objective, x0=x, args=(X, A), maxiter=maxiter)
