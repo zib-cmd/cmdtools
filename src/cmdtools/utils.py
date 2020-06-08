@@ -9,7 +9,7 @@ def randompropagator(n, reversible=True):
 
 
 def get_pi(T, pi="uniform"):
-    if pi is "uniform":
+    if pi == "uniform":
         dim = np.size(T, 1)
         pi = np.full(dim, 1./dim)
     elif pi == "auto":
