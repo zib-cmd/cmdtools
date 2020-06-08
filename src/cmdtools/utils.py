@@ -11,7 +11,7 @@ def randompropagator(n, reversible=True):
 def get_pi(T, pi="uniform"):
     if pi is "uniform":
         dim = np.size(T, 1)
-        pi = np.full(dim, 1/dim)
+        pi = np.full(dim, 1./dim)
     elif pi == "auto":
         raise NotImplementedError  # TODO Eigenvector to EV 1
     assert np.sum(pi) == 1
