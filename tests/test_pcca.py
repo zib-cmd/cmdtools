@@ -27,12 +27,14 @@ def test_example_n3():
 
 def test_schurvects(n=10, m=4):
     T = utils.randompropagator(n, reversible=False)
-    pcca.schurvects(T, m)
+    pi = utils.get_pi(T, "uniform")
+    pcca.schurvects(T, m, pi)
 
 
 def test_schurvects_generalized(n=10, m=3):
     T = utils.randompropagator(n)
-    X1 = pcca.schurvects(T, m)
+    pi = utils.get_pi(T, "uniform")
+    X1 = pcca.schurvects(T, m, pi)
     X2 = pcca.scipyschur(T, m, massmatrix=np.diag(np.ones(n)))
 
     # check if X1 and X2 span the same space
@@ -45,8 +47,8 @@ def test_krylovschur(n=30, m=5, N=100):
         for i in range(N):
             A = utils.randompropagator(n, reversible=False)
             try:
-                S = pcca.scipyschur(A, m)
-            except AssertionError:
+                S = pcca.scipyschur(A, m, onseperation="error")
+            except RuntimeError:
                 continue
             K = pcca.krylovschur(A, m)
             R = np.linalg.matrix_rank(np.concatenate([S, K], axis=1), tol=1e-6)

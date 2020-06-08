@@ -8,6 +8,16 @@ def randompropagator(n, reversible=True):
     return rowstochastic(T)
 
 
+def get_pi(T, pi="uniform"):
+    if pi is "uniform":
+        dim = np.size(T, 1)
+        pi = np.full(dim, 1./dim)
+    elif pi == "auto":
+        raise NotImplementedError  # TODO Eigenvector to EV 1
+    assert np.sum(pi) == 1
+    return pi
+
+
 def rowstochastic(T):
     return T / T.sum(axis=1)[:, None]
 
