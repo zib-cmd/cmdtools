@@ -3,48 +3,117 @@ import numpy as np
 from scipy.spatial import distance
 
 
-def propagator(timeseries, centers, sigma):
-    """ Given `timeseries` data, estimate the propagator matrix.
+class Gaussian:
+    def __init__(self, timeseries,
+                 centers=None, sqd=None, sigma=None, percentile=50):
+        self.timeseries = timeseries
+        self.centers = timeseries \
+            if centers is None else centers
+        self.sqd = sqdist(self.timeseries, self.centers) \
+            if sqd is None else sqd
+        self.sigma = find_bandwidth(self.sqd, percentile) \
+            if sigma is None else sigma
 
-    Uses the galerkin projection onto Gaussian ansatz functions
-    with bandwidth `sigma` around the given `centers`. """
-    m = get_membership(timeseries, centers, sigma)
-    counts = m[0:-1, :].T.dot(m[1:, :])
-    return utils.rowstochastic(counts)
+        self.membership = membership(self.sqd, self.sigma)
+        self.mass = massmatrix(self.membership)
+
+    @property
+    def propagator(self):
+        return propagator(self.membership)
 
 
-def get_membership(timeseries, centers, sigma):
-    """ Compute the pairwise membership / probability of each datapoint
-    to the Ansatz functions around each center. """
-    sqdist = distance.cdist(timeseries, centers, distance.sqeuclidean)
-    gausskernels = np.exp(-sqdist / (2 * sigma**2))
-    return utils.rowstochastic(gausskernels)
+def massmatrix(membership):
+    """ Compute the row-stochastic empirical mass function
+    S_ij = St_ij / sum_j St_ij
+    St_ij = 1/n sum_x phi_i(x) phi_j(x), x in traj
+    cf. ([TGDW2019] eqn 12, [W2006] eqn 35)
 
+    Args:
+        membership (matrix): row-stochastic membership matrix
+            of shape (#samples x #basis)
 
-def find_bandwidth(timeseries, centers, percentile=50):
+    Returns:
+        matrix: row-stochastic mass matrix S
     """
-    Find the bandwidth of the Gaussian based on:
 
+    St = membership.T.dot(membership)
+    return utils.rowstochastic(St)
+
+
+def lagged_propagator(m, lag, mass=None):
+    """
+    Given the membership of a trajectory to some basis functions,
+    estimate the propagator for a given time-lag.
+    This is achieved by skipping the corresponding lag in the trajectory
+    and averaging over the resulting subtrajectories.
+    """
+    p = np.zeros([m.shape[1], m.shape[1]])
+    for i in range(0, lag):
+        p += propagator(m[i::lag, :])
+    p = p / lag
+    return p
+
+
+# TODO: isn't this actually the koopman operator?
+def propagator(membership):
+    """Compute the row-stochastic empirical propagator
+    K_ij = Kt_ij / sum_j Kt_ij
+    Kt_ij = 1/n sum_x phi_i(x) phi_j(y), (x,y) in traj
+    cf. ([TGDW2019] eqn 12, [W2006] eqn 35)
+
+    Args:
+        membership (matrix): row-stochastic membership matrix
+            of shape (#samples x #basis)
+
+    Returns:
+        matrix: row-stochastic propagator P
+    """
+
+    counts = membership[0:-1, :].T.dot(membership[1:, :])
+    p = utils.rowstochastic(counts)
+    return p
+
+
+def membership(sqd, sigma):
+    """
+    Given square distances and standard deviation,
+    return the row-stochastic Gaussian membership matrix
+    """
+    m = np.exp(-sqd / (2 * sigma**2))
+    return utils.rowstochastic(m)
+
+
+def sqdist(timeseries, centers):
+    return distance.cdist(timeseries, centers, distance.sqeuclidean)
+
+
+def find_bandwidth(sqd, percentile=50):
+    """
+
+    Given the square-distance matrix d_ij = (x_i - x_j)^2
+    compute the standard deviation s for a Gaussian kernel
+    k(x_i,x_j) = exp(-1/h d_ij) with bandwidth parameter h = 2s^2.
+    We have h = med^2 / log n based on the intuition that we want
+    sum_j k(x_i, x_j) ≈ n exp(-1/h med^2) = 1
+    where n is the number of points and med the pairwise median distance
+
+    Percentile allows to shift from the median to an arbitrary percentage and
+    thus influences how many points have an influence on the bandwith.
+
+    Reference:
     "Stein Variational Gradient Descent:
     A General Purpose Bayesian Inference Algorithm",
     Qiang Liu and Dilin Wang (2016).
 
-    Based on the value of the percentile is possible to decide the points to
-    take into consideration for the determination of the bandwidth.
-
     Input:
-        timeseries: arr, trajectory, each row is a collection of \
-                    coordinates at a different timestep
-        centers:    arr, centers of the Gaussians, each row has the \
-                    coordinates of a different center
-        percentile: int [0,100], default value = 50
+        sqd: matrix, pairwise squared-distances of the samples
+        percentile: int [0,100], amount of samples to be in the "horizon" of h
 
-    Output:
-        sigma: float, the  variance of the Gaussian
+     Output:
+         sigma: float, the standard deviation of the Gaussian
     """
 
-    no_centers = np.shape(centers)[0]
-    sqdist = distance.cdist(timeseries, centers, distance.sqeuclidean)
-
-    # since we have h = perc**2/log(n) = 2 * sigma**2
-    return np.percentile(sqdist, percentile) / np.sqrt(2*np.log(no_centers))
+    n = np.size(sqd, 1)
+    h = np.percentile(sqd, percentile)**2 / np.log(n)
+    sigma = np.sqrt(h/2)
+    return sigma

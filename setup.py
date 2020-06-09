@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="cmdtools",
-    version="0.0.1",
+    version="0.0.2",
     author="Alexander Sikorski",
     author_email="sikorski@zib.de",
     description="A collection of tools relating to transfer operators",
