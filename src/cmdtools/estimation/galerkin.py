@@ -3,7 +3,7 @@ import numpy as np
 from scipy.spatial import distance
 
 
-class Trajectory:
+class Gaussian:
     def __init__(self, timeseries,
                  centers=None, sqd=None, sigma=None, percentile=50):
         self.timeseries = timeseries
@@ -15,11 +15,11 @@ class Trajectory:
             if sigma is None else sigma
 
         self.membership = membership(self.sqd, self.sigma)
-        self.mass = massmatrix(self.centers, self.sigma)
+        self.mass = massmatrix(self.membership)
 
     @property
     def propagator(self):
-        return propagator(self.membership, self.mass)
+        return propagator(self.membership)
 
 
 def massmatrix(membership):
