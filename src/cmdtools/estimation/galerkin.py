@@ -22,12 +22,22 @@ class Trajectory:
         return propagator(self.membership, self.mass)
 
 
-def massmatrix(centers, sigma):
-    """ compute the inverse of the mass matrix / the overlap
-    used to factor out the self-transitions induced by the overlapping basis"""
-    m = membership(sqdist(centers, centers), sigma)
-    p = m.T.dot(m)
-    return p
+def massmatrix(membership):
+    """ Compute the row-stochastic empirical mass function
+    S_ij = St_ij / sum_j St_ij
+    St_ij = 1/n sum_x phi_i(x) phi_j(x), x in traj
+    cf. ([TGDW2019] eqn 12, [W2006] eqn 35)
+
+    Args:
+        membership (matrix): row-stochastic membership matrix
+            of shape (#samples x #basis)
+
+    Returns:
+        matrix: row-stochastic mass matrix S
+    """
+
+    St = membership.T.dot(membership)
+    return utils.rowstochastic(St)
 
 
 def lagged_propagator(m, lag, mass=None):
@@ -39,22 +49,27 @@ def lagged_propagator(m, lag, mass=None):
     """
     p = np.zeros([m.shape[1], m.shape[1]])
     for i in range(0, lag):
-        p += propagator(m[i::lag, :]) / lag
+        p += propagator(m[i::lag, :])
     p = p / lag
-    if mass is not None:
-        p = mass.dot(p)  # TODO: is this correct? see below
     return p
 
 
-def propagator(m, mass=None):
+# TODO: isn't this actually the koopman operator?
+def propagator(membership):
+    """Compute the row-stochastic empirical propagator
+    K_ij = Kt_ij / sum_j Kt_ij
+    Kt_ij = 1/n sum_x phi_i(x) phi_j(y), (x,y) in traj
+    cf. ([TGDW2019] eqn 12, [W2006] eqn 35)
+
+    Args:
+        membership (matrix): row-stochastic membership matrix
+            of shape (#samples x #basis)
+
+    Returns:
+        matrix: row-stochastic propagator P
     """
-    Given the membership matrix of a trajectory to some basis functions
-    estimate the propagator
-    """
-    counts = m[0:-1, :].T.dot(m[1:, :])
-    p = counts
-    if mass is not None:
-        p = p.dot(np.linalg.inv(mass))  # TODO: is this correct? see above
+
+    counts = membership[0:-1, :].T.dot(membership[1:, :])
     p = utils.rowstochastic(counts)
     return p
 
