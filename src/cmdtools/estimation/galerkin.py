@@ -6,11 +6,13 @@ from scipy.spatial import distance
 class Trajectory:
     def __init__(self, timeseries, centers=None, sqd=None, sigma=None, percentile=50):
         self.timeseries = timeseries
-        self.centers = timeseries if centers is None else centers
-        self.sqd = sqdist(
-            self.timeseries, self.centers) if sqd is None else sqd
-        self.sigma = find_bandwidth(
-            self.sqd, percentile) if sigma is None else sigma
+        self.centers = timeseries \
+            if centers is None else centers
+        self.sqd = sqdist(self.timeseries, self.centers) \
+            if sqd is None else sqd
+        self.sigma = find_bandwidth(self.sqd, percentile) \
+            if sigma is None else sigma
+
         self.membership = membership(self.sqd, self.sigma)
         self.mass = massmatrix(self.centers, self.sigma)
 
@@ -18,8 +20,9 @@ class Trajectory:
     def propagator(self):
         return propagator(self.membership, self.mass)
 
+
 def massmatrix(centers, sigma):
-    """ compute the inverse of the mass matrix / the overlap 
+    """ compute the inverse of the mass matrix / the overlap
     used to factor out the self-transitions induced by the overlapping basis"""
     m = membership(sqdist(centers, centers), sigma)
     p = m.T.dot(m)
@@ -56,19 +59,19 @@ def sqdist(timeseries, centers):
 
 
 def find_bandwidth(sqd, percentile=50):
-    """Find the bandwidth of the Gaussian based on: 
+    """Find the bandwidth of the Gaussian based on:
 
-    "Stein Variational Gradient Descent: 
-    A General Purpose Bayesian Inference Algorithm", 
+    "Stein Variational Gradient Descent:
+    A General Purpose Bayesian Inference Algorithm",
     Qiang Liu and Dilin Wang (2016).
 
      Based on the value of the percentile is possible to decide the points to
      take into consideration for the determination of the bandwidth.
 
     Input:
-        timeseries: arr, trajectory, each row is a collection of 
+        timeseries: arr, trajectory, each row is a collection of
             coordinates at a different timestep
-        centers: arr, centers of the Gaussians, each row has the coordinates 
+        centers: arr, centers of the Gaussians, each row has the coordinates
             of a different center
         percentile: int [0,100], default value = 50
 
