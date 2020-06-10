@@ -128,8 +128,7 @@ def krylovschur(A, n, massmatrix=None, onseperation="continue"):
 
     from petsc4py import PETSc
     from slepc4py import SLEPc
-    M = PETSc.Mat().create()
-    M.createDense(list(np.shape(A)), array=A)
+    M = petsc_matrix(A)
     E = SLEPc.EPS().create()
     E.setOperators(M)
     E.setDimensions(nev=n)
@@ -137,3 +136,17 @@ def krylovschur(A, n, massmatrix=None, onseperation="continue"):
     E.solve()
     X = np.column_stack([x.array for x in E.getInvariantSubspace()])
     return X[:, :n]
+
+
+def petsc_matrix(A):
+    from scipy import sparse
+    from petsc4py import PETSc
+    from slepc4py import SLEPc
+
+    M = PETSc.Mat()
+    if sparse.isspmatrix_csr(A):
+        nrows = np.size(A, 0)
+        M.createAIJWithArrays(nrows, (A.indptr, A.indices, A.data))
+    else:
+        M.createDense(list(np.shape(A)), array=A)
+    return M

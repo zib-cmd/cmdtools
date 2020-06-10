@@ -51,22 +51,48 @@ def test_krylovschur(n=30, m=5, N=100):
             assert R == m
 
 
-def test_bench_scipyschur(benchmark, n=500, m=6):
+N_BENCHMARK = 1000
+M_BENCHMARK = 10
+
+
+def test_bench_scipyschur(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):
     T = utils.randompropagator(n)
     massmatrix = np.diag(np.ones(n))
     solver = pcca.ScipySchur()
     benchmark(solver.solve, T, m, massmatrix)
 
 
-def test_bench_scipyqz(benchmark, n=500, m=6):
+def test_bench_scipyqz(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):
     T = utils.randompropagator(n)
     solver = pcca.ScipySchur()
     benchmark(solver.solve, T, m)
 
 
-def test_bench_krylovschur(benchmark, n=500, m=6):
+def test_bench_krylovschur(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):
     if not pcca.HAS_SLEPC:
         return
     T = utils.randompropagator(n)
+    solver = pcca.KrylovSchur(onseperation="continue")
+    benchmark(solver.solve, T, m)
+
+
+def test_bench_krylovschursparse_dense(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):
+    if not pcca.HAS_SLEPC:
+        return
+    from scipy import sparse
+    T = utils.randompropagator(n)
+    T = sparse.csr_matrix(T)
+    solver = pcca.KrylovSchur(onseperation="continue")
+    benchmark(solver.solve, T, m)
+
+
+def test_bench_krylovschursparse_sparse(benchmark, n=N_BENCHMARK, m=M_BENCHMARK, p=0.01):
+    if not pcca.HAS_SLEPC:
+        return
+    from scipy import sparse
+    T = sparse.random(n, n, p)
+    T = np.array(np.identity(n) + T)
+    T = utils.rowstochastic(T)
+    T = sparse.csr_matrix(T)
     solver = pcca.KrylovSchur(onseperation="continue")
     benchmark(solver.solve, T, m)
