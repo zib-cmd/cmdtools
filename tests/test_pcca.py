@@ -49,3 +49,24 @@ def test_krylovschur(n=30, m=5, N=100):
             K = pcca.krylovschur(A, m)
             R = np.linalg.matrix_rank(np.concatenate([S, K], axis=1), tol=1e-6)
             assert R == m
+
+
+def test_bench_scipyschur(benchmark, n=500, m=6):
+    T = utils.randompropagator(n)
+    massmatrix = np.diag(np.ones(n))
+    solver = pcca.ScipySchur()
+    benchmark(solver.solve, T, m, massmatrix)
+
+
+def test_bench_scipyqz(benchmark, n=500, m=6):
+    T = utils.randompropagator(n)
+    solver = pcca.ScipySchur()
+    benchmark(solver.solve, T, m)
+
+
+def test_bench_krylovschur(benchmark, n=500, m=6):
+    if not pcca.HAS_SLEPC:
+        return
+    T = utils.randompropagator(n)
+    solver = pcca.KrylovSchur(onseperation="continue")
+    benchmark(solver.solve, T, m)
