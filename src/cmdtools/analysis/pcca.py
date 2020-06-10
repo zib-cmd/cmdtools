@@ -11,6 +11,9 @@ try:
 except ImportError:
     HAS_SLEPC = False
 
+# Class interfaces
+# These are mainly wrappers around the functions below
+
 
 class PCCA:
     def __init__(self, T=None, n=None, pi="uniform", massmatrix=None,
@@ -49,6 +52,9 @@ class ScipySchur:
 
     def solve(self, T, n, massmatrix=None):
         return scipyschur(T, n, massmatrix, self.onseperation)
+
+# Functions
+# the logic of the above classes following a more functional style
 
 
 # compatibility to old functioncalls / tests
