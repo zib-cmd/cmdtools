@@ -1,41 +1,69 @@
 import numpy as np
 from scipy.linalg import schur, ordqz
-from .optimization import inner_simplex_algorithm, optimize
+from .optimization import Optimizer
 from ..utils import get_pi
 import warnings
 
 # TODO: find a better solution to this
 try:
     import slepc  # noqa: F401
-    USE_SLEPC = True
+    HAS_SLEPC = True
 except ImportError:
-    USE_SLEPC = False
+    HAS_SLEPC = False
 
 
+class PCCA:
+    def __init__(self, T=None, n=None, pi="uniform", massmatrix=None,
+                 onseperation="warn"):
+        self.T = T
+        self.n = n
+        self.pi = get_pi(T, pi)
+        self.massmatrix = massmatrix
+        self.eigensolver = ScipySchur()
+        self.optimizer = Optimizer()
+        if T is not None:
+            self.solve()
+
+    def solve(self):
+        T, n, pi, massmatrix, eigensolver, optimizer = self.T, self.n, \
+            self.pi, self.massmatrix, self.eigensolver, self.optimizer
+
+        chi, X, A, = \
+            _pcca(T, n, pi, massmatrix, eigensolver, optimizer)
+
+        self.chi, self.X, self.A = chi, X, A
+        return chi
+
+
+class KrylovSchur:
+    def __init__(self, onseperation="warn"):
+        self.onseperation = onseperation
+
+    def solve(self, A, n, massmatrix=None):
+        return krylovschur(A, n, massmatrix, self.onseperation)
+
+
+class ScipySchur:
+    def __init__(self, onseperation="warn"):
+        self.onseperation = onseperation
+
+    def solve(self, T, n, massmatrix=None):
+        return scipyschur(T, n, massmatrix, self.onseperation)
+
+
+# compatibility to old functioncalls / tests
 def pcca(T, n, pi="uniform"):
-    pi = get_pi(T, pi)
-    X = schurvects(T, n, pi)
-    A = inner_simplex_algorithm(X)
-    if n > 2:
-        A = optimize(X, A, pi)
-    chi = X.dot(A)
-    return chi
+    p = PCCA(T, n, pi)
+    return p.solve()
 
 
-def schurvects(T, n, pi):
-    """
-    compute the leading n schurvectors X
-    wrt. the scalar product induced by pi
-    (i.e. X^T D X = I with D=diag(pi))
-    """
-
-    if USE_SLEPC:
-        X = krylovschur(T, n)
-    else:
-        X = scipyschur(T, n)
-
+# this will be the new pcca function, the old function is replaced by the Class
+def _pcca(T, n, pi, massmatrix, eigensolver, optimizer):
+    X = eigensolver.solve(T, n, massmatrix)
     X = gramschmidt(X, pi)
-    return X
+    A = optimizer.solve(X, pi)
+    chi = np.dot(X, A)
+    return chi, X, A
 
 
 def gramschmidt(X, pi):
@@ -45,8 +73,8 @@ def gramschmidt(X, pi):
     for i in range(np.size(X, 1)):
         if i == 0:
             if np.isclose(np.dot(X[:, 0], np.full(np.size(X, 0), 1)), 0):
-                # this should not happen, if so we have to swap columns
-                raise RuntimeError("First column is orthogonal to 1-Vector")
+                raise RuntimeError("First column is orthogonal to 1-Vector, \
+                                    try swapping the columns")
             X[:, 0] = 1
         else:
             for j in range(i):
