@@ -131,26 +131,3 @@ def krylovschur(A, n, massmatrix=None, onseperation="continue"):
     E.solve()
     X = np.column_stack([x.array for x in E.getInvariantSubspace()])
     return X[:, :n]
-
-
-def normalizeschur(X):
-    # find the constant eigenvector corresponding to ev. 1,
-    # move it to the front and set it to 1
-    # as required by the optimization routine
-
-    X /= np.linalg.norm(X, axis=0)
-    i = np.argmax(np.abs(np.sum(X, axis=0)))
-    X[:, i] = X[:, 0]
-    X[:, 0] = 1  # TODO: check if this column is indeed constant
-
-    return X
-
-
-def normalizeschur2(X):
-    n, m = np.shape(X)
-    T = np.identity(m)
-    T[:, 0] = np.dot(np.ones(n)/np.sqrt(n), X)
-    if np.isclose(T[0, 0], 0):
-        raise RuntimeError("X[:,1] must not be orthogonal to the one-vector")
-    tX = np.dot(X, T)
-    return tX
