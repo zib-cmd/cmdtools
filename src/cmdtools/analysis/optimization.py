@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.optimize import fmin
+import warnings
 
 """ References:
 
@@ -8,6 +9,17 @@ Deuflhard, P. and Weber, M., 2005. Robust Perron cluster analysis in conformatio
 For the objective function:
 Röblitz, S. and Weber, M., 2013. Fuzzy spectral clustering by PCCA+: https://doi.org/10.1007/s11634-013-0134-6
 """
+
+
+class Optimizer:
+    def __init__(self, maxiter=1000):
+        self.maxiter = maxiter
+
+    def solve(self, X, pi=None):
+        assertstructure(X, pi)
+        A = inner_simplex_algorithm(X)
+        A, self.iters, self.flags = optimize(X, A, self.maxiter)
+        return A
 
 
 def inner_simplex_algorithm(X):
@@ -43,7 +55,7 @@ def indexsearch(X):
     return ind
 
 
-def optimize(X, A, pi, maxiter=1000):
+def optimize(X, A, maxiter=1000):
     """
     optimization of A
     - the feasiblization routine fillA() requires
@@ -51,13 +63,15 @@ def optimize(X, A, pi, maxiter=1000):
     - the optimzation criterion expects X^T D X = I
     (where D is the stationary diagonal matrix)
     """
-    assertstructure(X, pi)
     x = A[1:, 1:]
-    x = fmin(objective, x0=x, args=(X, A), maxiter=maxiter)
+    x, _, _, iters, flags = fmin(objective, x0=x, args=(X, A),
+                                 maxiter=maxiter, disp=False, full_output=True)
+    if flags != 0:
+        warnings.warn("Optimization did not converge")
     n = np.size(A, axis=1) - 1
     A[1:, 1:] = x.reshape(n, n)
     fillA(A, X)
-    return A
+    return A, iters, flags
 
 
 def assertstructure(X, pi):

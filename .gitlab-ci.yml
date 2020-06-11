@@ -1,21 +1,31 @@
 image: "python:3.7"
 
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+
 before_script:
-  - python --version
   - pip install flake8
   - pip install tox
 
-stages:
-  - Lint
-  - Test
+cache:
+  key: one-key-to-rule-them-all
+  paths:
+  - .cache
+  - .tox
 
-flake8:
-  stage: Lint
+lint:
   allow_failure: true
   script:
   - flake8
   
 pytest:
-  stage: Test
   script:
   - tox
+  artifacts:
+    reports:
+      junit: report.xml
+
+benchmark:
+  when: manual
+  script:
+    - tox -e benchmark -q
