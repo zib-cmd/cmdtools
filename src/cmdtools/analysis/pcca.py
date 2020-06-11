@@ -15,29 +15,6 @@ except ImportError:
 # These are mainly wrappers around the functions below
 
 
-class PCCA:
-    def __init__(self, T=None, n=None, pi="uniform", massmatrix=None,
-                 onseperation="warn"):
-        self.T = T
-        self.n = n
-        self.pi = get_pi(T, pi)
-        self.massmatrix = massmatrix
-        self.eigensolver = ScipySchur()
-        self.optimizer = Optimizer()
-        if T is not None:
-            self.solve()
-
-    def solve(self):
-        T, n, pi, massmatrix, eigensolver, optimizer = self.T, self.n, \
-            self.pi, self.massmatrix, self.eigensolver, self.optimizer
-
-        chi, X, A, = \
-            _pcca(T, n, pi, massmatrix, eigensolver, optimizer)
-
-        self.chi, self.X, self.A = chi, X, A
-        return chi
-
-
 class KrylovSchur:
     def __init__(self, onseperation="warn"):
         self.onseperation = onseperation
@@ -52,6 +29,31 @@ class ScipySchur:
 
     def solve(self, T, n, massmatrix=None):
         return scipyschur(T, n, massmatrix, self.onseperation)
+
+
+class PCCA:
+    def __init__(self, T=None, n=None, pi="uniform", massmatrix=None,
+                 eigensolver=ScipySchur(), optimizer=Optimizer()):
+        self.T = T
+        self.n = n
+        self.pi = get_pi(T, pi)
+        self.massmatrix = massmatrix
+        self.eigensolver = eigensolver
+        self.optimizer = optimizer
+        if T is not None:
+            self.solve()
+
+    def solve(self):
+        T, n, pi, massmatrix, eigensolver, optimizer = self.T, self.n, \
+            self.pi, self.massmatrix, self.eigensolver, self.optimizer
+
+        chi, X, A, = \
+            _pcca(T, n, pi, massmatrix, eigensolver, optimizer)
+
+        self.chi, self.X, self.A = chi, X, A
+        return chi
+
+
 
 # Functions
 # the logic of the above classes following a more functional style
