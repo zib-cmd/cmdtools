@@ -54,7 +54,6 @@ class PCCA:
         return chi
 
 
-
 # Functions
 # the logic of the above classes following a more functional style
 
