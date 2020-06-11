@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf8") as fh:
 
 setuptools.setup(
     name="cmdtools",
-    version="0.0.1",
+    version="0.0.2",
     author="Alexander Sikorski",
     author_email="sikorski@zib.de",
     description="A collection of tools relating to transfer operators",
@@ -20,4 +20,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=['numpy', 'scipy'],
+    extras_require={'slepc': ['petsc4py', 'slepc4py']}
 )
