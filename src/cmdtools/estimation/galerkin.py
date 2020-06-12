@@ -54,6 +54,15 @@ def lagged_propagator(m, lag, mass=None):
     return p
 
 
+def lagged_propagators(membership, mass, maxlag=1):
+    n = np.size(membership, 1)
+    props = np.zeros((maxlag+1, n, n))
+    props[0, :, :] = mass
+    for i in range(1, maxlag+1):
+        props[i, :, :] = lagged_propagator(membership, i)
+    return props
+
+
 # TODO: isn't this actually the koopman operator?
 def propagator(membership):
     """Compute the row-stochastic empirical propagator
