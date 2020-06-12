@@ -17,3 +17,5 @@
 
 .ipynb_checkpoints
 docs/_build
+
+report.xml
