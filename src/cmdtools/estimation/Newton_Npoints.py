@@ -1,22 +1,32 @@
 import numpy as np
 import copy
+from .galerkin import propagator
+from math import factorial
 
 
-def factorial(n):
-    if n == 0:
-        return 1
-    else:
-        return n * factorial(n-1)
+def lagged_propagators(membership, mass, maxlag=1):
+    n = np.size(membership, 1)
+    props = np.zeros((maxlag+1, n, n))
+    props[0, :, :] = mass
+    for i in range(1, maxlag + 1):
+        props[i, :, :] = propagator(membership, i)
+    return props
+
+
+def newton_generator(traj, order):
+    props = lagged_propagators(traj.membership, traj.mass, maxlag=order)
+    q = Newton_N(props, 1, 0)
+    return q
 
 
 def div_diff(P):
     """Function computing the divided difference formula for interpolation points
     with equal discretization distance (later called h). Return the divided differences
-    for the given matrices in the tensor P, but without binomial coefficient in from of 
+    for the given matrices in the tensor P, but without binomial coefficient in from of
     each result.
     Input:
         P= tensor
-    Output: 
+    Output:
         tensor containing the divided differences values."""
     t = int(np.shape(P)[0])
     n = int(np.shape(P)[1])
@@ -35,10 +45,10 @@ def div_diff(P):
 
 
 def Newton_N(B, h, x):
-    """Function for computing the transition rate matrix at the point x from the 
+    """Function for computing the transition rate matrix at the point x from the
     time series of the transition probability matrix (contained in the vector B)
-    with the discretization contant h. 
-    The method used is the Newton's polynomial extrapolation derived at the 
+    with the discretization contant h.
+    The method used is the Newton's polynomial extrapolation derived at the
     point x.    The programmed formula is the one in paragraph 13.2 of
     "Formelsammlung for numerische Mathematik in C-Programming",
     Engeln-Muellges, Reutter, SI Wissenschaftsverlag, 1990.
@@ -78,8 +88,8 @@ def Newton_N(B, h, x):
 
 
 def Newton2(B, h, x):
-    """Make sure that the sum of the entries of each row of the generator 
-    matrix is zero. To do it, it apply the function Newton_N and then make the 
+    """Make sure that the sum of the entries of each row of the generator
+    matrix is zero. To do it, it apply the function Newton_N and then make the
     sum of each row equal zero.
 
     Input:
