@@ -8,8 +8,8 @@ This Python library implements a suite of tools used and/or developed in the [Co
 ## Installation
 
 1.  Clone the repository with `git clone https://git.zib.de/cmd/cmdtools.git`
-2.  Install into your python library with `pip install cmdtools`
-    (If you want to use the SLEPc library for optimized Schur decompositions install cmdtools with the extra slepc, i.e. `pip install "cmdtools[slepc]"`)
+2.  Install into your python library with `pip install -e cmdtools`
+    (If you want to use the SLEPc library for optimized Schur decompositions install cmdtools with the extra slepc, i.e. `pip install -e "cmdtools[slepc]"`)
 
 ## Contents
 *  `cmdtools.analysis.pcca`: An implementation of (generalized) PCCA⁺ using the Schur decomposition
