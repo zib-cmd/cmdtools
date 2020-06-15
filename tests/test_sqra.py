@@ -11,7 +11,7 @@ def test_sqra():
     phi = grids**2 / beta / 9
 
     # potential
-    u = np.exp(-50*(grid-0.6)**2)
+    u = 50*(grid-0.6)**2
 
     # adjacency matrix of the intervals for Q-assembly
     A = np.diag(np.ones(grids), k=1)

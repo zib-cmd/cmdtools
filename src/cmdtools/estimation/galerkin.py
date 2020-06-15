@@ -40,22 +40,8 @@ def massmatrix(membership):
     return utils.rowstochastic(St)
 
 
-def lagged_propagator(m, lag, mass=None):
-    """
-    Given the membership of a trajectory to some basis functions,
-    estimate the propagator for a given time-lag.
-    This is achieved by skipping the corresponding lag in the trajectory
-    and averaging over the resulting subtrajectories.
-    """
-    p = np.zeros([m.shape[1], m.shape[1]])
-    for i in range(0, lag):
-        p += propagator(m[i::lag, :])
-    p = p / lag
-    return p
-
-
 # TODO: isn't this actually the koopman operator?
-def propagator(membership):
+def propagator(membership, lag=1):
     """Compute the row-stochastic empirical propagator
     K_ij = Kt_ij / sum_j Kt_ij
     Kt_ij = 1/n sum_x phi_i(x) phi_j(y), (x,y) in traj
@@ -69,7 +55,7 @@ def propagator(membership):
         matrix: row-stochastic propagator P
     """
 
-    counts = membership[0:-1, :].T.dot(membership[1:, :])
+    counts = membership[0:-lag, :].T.dot(membership[lag:, :])
     p = utils.rowstochastic(counts)
     return p
 

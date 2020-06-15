@@ -1,11 +1,12 @@
 import setuptools
+from io import open
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="cmdtools",
-    version="0.0.2",
+    version="0.2.0",
     author="Alexander Sikorski",
     author_email="sikorski@zib.de",
     description="A collection of tools relating to transfer operators",
