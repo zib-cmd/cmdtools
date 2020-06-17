@@ -70,7 +70,7 @@ def membership(sqd, sigma):
 
 
 def sqdist(timeseries, centers):
-    return distance.cdist(timeseries, centers, distance.sqeuclidean)
+    return distance.cdist(timeseries, centers, 'sqeuclidean')
 
 
 def find_bandwidth(sqd, percentile=50):
