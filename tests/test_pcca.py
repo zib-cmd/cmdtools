@@ -58,15 +58,15 @@ M_BENCHMARK = 10
 
 def test_bench_scipyschur(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):
     T = utils.randompropagator(n)
-    massmatrix = np.diag(np.ones(n))
     solver = pcca.ScipySchur()
-    benchmark(solver.solve, T, m, massmatrix)
+    benchmark(solver.solve, T, m)
 
 
 def test_bench_scipyqz(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):
     T = utils.randompropagator(n)
+    massmatrix = np.diag(np.ones(n))
     solver = pcca.ScipySchur()
-    benchmark(solver.solve, T, m)
+    benchmark(solver.solve, T, m, massmatrix)
 
 
 def test_bench_krylovschur(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):

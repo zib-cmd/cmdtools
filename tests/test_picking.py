@@ -11,3 +11,8 @@ def test_picking():
     assert (P == X[inds, :]).all
     assert (d == dist.cdist(P, P)).all()
     assert np.amin(d + np.identity(m) * 10) > 2
+
+
+def test_picking_bench(benchmark):
+    x = np.random.rand(1000, 2)
+    benchmark(picking_algorithm, x, 100)
