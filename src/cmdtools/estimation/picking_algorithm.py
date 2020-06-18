@@ -3,7 +3,7 @@ import numpy as np
 import scipy.spatial.distance as dist
 
 
-def picking_algorithm(X, n, metric='sqeuclidean'):
+def picking_algorithm(X, n, metric='euclidean'):
     """Picking algorithm (Durmaz, 2016)
 
     Pick out n points such that the respective minimal distance
@@ -27,10 +27,10 @@ def picking_algorithm(X, n, metric='sqeuclidean'):
         Pairwise distances between all respectively the chosen points
     """
     d = np.empty((n, np.size(X, 0)))
-    d[0, :] = dist.cdist(X[[0], :], X)
+    d[0, :] = dist.cdist(X[[0], :], X, metric)
     qs = [0]
     for k in range(1, n):
         q = np.argmax(np.min(d[:k, :], axis=0))
         d[k, :] = dist.cdist(X[[q], :], X, metric)
         qs.append(q)
-    return X[qs, :], qs, d
+    return X[qs, :], qs, d.T

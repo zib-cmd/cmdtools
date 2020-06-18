@@ -69,8 +69,10 @@ def membership(sqd, sigma):
     return utils.rowstochastic(m)
 
 
-def sqdist(timeseries, centers):
-    return distance.cdist(timeseries, centers, 'sqeuclidean')
+def sqdist(timeseries, centers, metric='sqeuclidean'):
+    d = distance.cdist(timeseries, centers, metric)
+    sqd = d if metric == 'sqeuclidean' else d**2
+    return sqd
 
 
 def find_bandwidth(sqd, percentile=50):

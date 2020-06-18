@@ -8,9 +8,8 @@ def test_picking():
     m = 5
     X = np.repeat(np.array([range(n)]).T, axis=1, repeats=2)
     P, inds, d = picking_algorithm(X, m)
-    assert (P == X[inds, :]).all
-    assert (d == dist.cdist(P, P)).all()
-    assert np.amin(d + np.identity(m) * 10) > 2
+    assert np.allclose(P, X[inds, :])
+    assert np.allclose(d, dist.cdist(X, P))
 
 
 def test_picking_bench(benchmark):
