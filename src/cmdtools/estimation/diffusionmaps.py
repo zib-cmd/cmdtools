@@ -2,6 +2,8 @@ import scipy.linalg as lin
 import scipy.spatial.distance as scidist
 import numpy as np
 import warnings
+import sklearn.neighbors as neighbors
+from cmdtools.utils import rowstochastic
 
 
 class DiffusionMaps:
@@ -40,7 +42,7 @@ def diffusion_matrix(X, sigma, alpha, metric):
     Kh = np.diag(q).dot(K).dot(np.diag(q))
 
     # row-normalization
-    P = Kh / np.sum(Kh, axis=1)[:, None]
+    P = rowstochastic(Kh)
     return P, q
 
 
@@ -65,7 +67,7 @@ def oos_extension(Xnew, Xold, metric, sigma, alpha, q, dms, evals):
     qnew = np.power(np.sum(Knew, axis=1), -alpha)
 
     Kh = np.diag(qnew).dot(Knew).dot(np.diag(q))
-    Pnew = Kh / np.sum(Kh, axis=1)[:, None]
+    Pnew = rowstochastic(Kh)
 
     dmsnew = Pnew.dot(dms) / evals[None, :]
     return dmsnew
@@ -75,3 +77,26 @@ def test_diffusionmaps():
     X = np.random.rand(100, 100)
     dm = DiffusionMaps(X)
     assert np.allclose(dm.oos_extension(X), dm.dms)
+
+
+def nearest_neightbor_dists(X, k, metric):
+    return neighbors.kneighbors_graph(X, k, mode='distance', metric=metric)
+
+
+def superdist(X, Y = None, metric='squeclidean', squared=True, knn=None):
+    if Y is X:
+        Y = None
+    if knn not None:
+        if Y not None:
+            raise Error("Nearest neighbor not defined for X neq Y")
+        d = neighbors.kneighbors_graph(X, knn, mode='distance', metric=metric)
+    else:
+        if Y is None:
+            d = scidist.squareform(scidist.pdist(X, metric))
+        else:
+            d = scidist.cdist(X, Y, metric)
+
+    if squared and metric is not 'squeclidean':
+        d = d**2
+
+    return d
