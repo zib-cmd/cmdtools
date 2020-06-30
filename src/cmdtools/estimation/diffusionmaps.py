@@ -35,11 +35,10 @@ class NNDistances(Distances):
             return super().dist(X, Y)
         d = neighbors.kneighbors_graph(
             X, self.k, mode='distance', metric=self.metric)
-        return np.array(d.todense()) # since we cant deal with sparse so far
+        return d.toarray()  # since we cant deal with sparse so far
 
 
 class DiffusionMaps:
-
     def __init__(self, X, sigma=1, alpha=1, distances=Distances(), n=1):
         self.X = X
         self.sigma = sigma
@@ -106,5 +105,5 @@ def oos_extension(Xnew, Xold, distances, sigma, alpha, q, dms, evals):
 def test_diffusionmaps():
     X = np.random.rand(100, 5)
     dm = DiffusionMaps(X)
-    dm2 = DiffusionMaps(X, distances=NNDistances(20))
+    DiffusionMaps(X, distances=NNDistances(20))
     assert np.allclose(dm.oos_extension(X), dm.dms)
