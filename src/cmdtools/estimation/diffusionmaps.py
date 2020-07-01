@@ -30,11 +30,14 @@ class NNDistances(Distances):
         super().__init__(*args, **kwargs)
 
     def dist(self, X, Y=None):
-        if Y is not None:
-            warnings.warn("NN distances not supported for X!=Y, falling back")
-            return super().dist(X, Y)
-        d = neighbors.kneighbors_graph(
-            X, self.k, mode='distance', metric=self.metric)
+        if Y is X or Y is None:
+            d = neighbors.kneighbors_graph(
+                X, self.k, mode='distance', metric=self.metric)
+        else:
+            n = neighbors.NearestNeighbors(metric=self.metric)
+            n.fit(Y)
+            d = n.kneighbors_graph(X, self.k, mode='distance')
+
         return d.toarray()  # since we cant deal with sparse so far
 
 
@@ -104,6 +107,9 @@ def oos_extension(Xnew, Xold, distances, sigma, alpha, q, dms, evals):
 
 def test_diffusionmaps():
     X = np.random.rand(100, 5)
-    dm = DiffusionMaps(X)
-    DiffusionMaps(X, distances=NNDistances(20))
-    assert np.allclose(dm.oos_extension(X), dm.dms)
+    Y = np.random.rand(10, 5)
+    dm1 = DiffusionMaps(X)
+    dm2 = DiffusionMaps(X, distances=NNDistances(20))
+    for dm in [dm1, dm2]:
+        assert np.allclose(dm.oos_extension(X), dm.dms)
+        dm.oos_extension(Y)
