@@ -8,7 +8,7 @@ def test_propagator():
     centers = rand(4, 3)
     traj = galerkin.Gaussian(timeseries=x, centers=centers)
     P = traj.propagator
-    assert P.shape == (4,4)
+    assert P.shape == (4, 4)
     assert utils.is_rowstochastic(P)
 
 # TODO: need tests checking if the results make any sense
