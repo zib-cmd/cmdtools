@@ -103,13 +103,3 @@ def oos_extension(Xnew, Xold, distances, sigma, alpha, q, dms, evals):
     dmsnew = Pnew.dot(dms) / evals[None, :]
     dmsnew = np.real(dmsnew)
     return dmsnew
-
-
-def test_diffusionmaps():
-    X = np.random.rand(100, 5)
-    Y = np.random.rand(10, 5)
-    dm1 = DiffusionMaps(X)
-    dm2 = DiffusionMaps(X, distances=NNDistances(20))
-    for dm in [dm1, dm2]:
-        assert np.allclose(dm.oos_extension(X), dm.dms)
-        dm.oos_extension(Y)
