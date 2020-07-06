@@ -48,21 +48,33 @@ def by_picking(X, n):
 
 class GridTrajectory:
     def __init__(self, traj, lims, ns):
-        pass
+        if lims is None:
+            mins = np.min(traj, 0)
+            maxs = np.max(traj, 0)
+            lims = np.vstack((mins, maxs)).T
+        else:
+            lims = np.array(lims)
+        self.lims = lims
+
+        if np.isscalar(ns):
+            ns = np.repeat(ns, np.size(traj, 1))
+        else:
+            ns = np.array(ns)
+        self.ns = ns
+
+        bti = boxtrajinds(traj, lims, ns)
+        b, ti = np.unique(bti, return_inverse=True)
+        # b[ti] == bti
+
+        self.boxinds = b
+        self.centers = boxcenters(b, lims, ns)
+        self.traj = ti
+
+    def propagator(self, dt=1):
+        return propagator(self.traj, len(self.boxinds), dt)
 
 
-def getboxes(traj, lims=None, ns=1):
-    if lims is None:
-        mins = np.min(traj, 0)
-        maxs = np.max(traj, 0)
-        lims = np.vstack((mins, maxs)).T
-    else:
-        lims = np.array(lims)
-    if np.isscalar(ns):
-        ns = np.repeat(ns, np.size(traj, 1))
-    else:
-        ns = np.array(ns)
-
+def boxtrajinds(traj, lims=None, ns=1):
     scale = lims[:, 1] - lims[:, 0]
     normalized = (traj - lims[:, 0]) / scale
     n = np.size(traj, 0)
@@ -92,6 +104,8 @@ def boxcenters(inds, lims, ns):
         coords[i, :] = lims[:, 0] + (1/ns) * (unrav[:, i] + 1/2) * scale
     return coords
 
-inds = [0,1,2]
-lims = [[0,1]]
+
+inds = [0, 1, 2]
+lims = [[0, 1]]
 ns = [3]
+
