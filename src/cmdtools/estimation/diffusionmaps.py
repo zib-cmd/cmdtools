@@ -44,10 +44,16 @@ class NNDistances(Distances):
 class DiffusionMaps:
     def __init__(self, X, sigma=1, alpha=1, distances=Distances(), n=1):
         self.X = X
-        self.sigma = sigma
         self.alpha = alpha
         self.distances = distances
         self.n = n
+
+        if sigma == 'estimate':
+            self.sigma = self.bandwidth_estimator()
+        elif isinstance(sigma, np.ndarray):
+            self.sigma = self.bandwidth_estimator(range_exp=sigma)
+        else:
+            self.sigma = sigma
 
         self.diffusion_matrix()
         self.diffusionmaps()
@@ -63,8 +69,10 @@ class DiffusionMaps:
         return oos_extension(
             Xnew, self.X, self.distances, self.sigma, self.alpha,
             self.q, self.dms, self.evals)
-    
-    # ToDo: add bandwidth estimator
+
+    def bandwidth_estimator(self, range_exp=np.arange(-20., 10.)):
+        return bandwidth_estimator(
+            self.X, self.distances, range_exp)
 
 
 def diffusion_matrix(X, sigma, alpha, distances):
@@ -106,20 +114,21 @@ def oos_extension(Xnew, Xold, distances, sigma, alpha, q, dms, evals):
     dmsnew = np.real(dmsnew)
     return dmsnew
 
-def bandwidth_estimator(X,distances,range_exp = np.arange(-20.,10.)):
+
+def bandwidth_estimator(X, distances, range_exp):
     '''
-    Bandwidth estimator searching for the optimal sigma in 2^range_exp according
-    to the heuristics from: 
-    Berry, Tyrus, and John Harlim. "Variable bandwidth diffusion kernels." 
+    Bandwidth estimator searching for the optimal sigma in 2^range_exp
+    according to the heuristics from:
+    Berry, Tyrus, and John Harlim. "Variable bandwidth diffusion kernels."
     Applied and Computational Harmonic Analysis 40.1 (2016): 68-96.
     '''
-    
-    sigmas = 2**range_exp # range of sigmas to test
+    sigmas = 2**range_exp  # range of sigmas
     sqd = distances.sqdist(X)
- 
-    log_S = np.array([np.log(np.sum(1/np.size(sqd)*np.exp(-sqd / (2 * s**2)))) for s in sigmas])
-    log_sig =  np.log(sigmas**2) 
+
+    log_S = np.array([np.log(np.sum(1/np.size(sqd) *
+                                np.exp(-sqd / (2 * s**2)))) for s in sigmas])
+    log_sig = np.log(sigmas**2)
     index = np.argmax((log_S[1:]-log_S[:-1])/(log_sig[1:]-log_sig[:-1]))
-    
+
     sigma = sigmas[index]
     return sigma
