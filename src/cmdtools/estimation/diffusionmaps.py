@@ -63,6 +63,8 @@ class DiffusionMaps:
         return oos_extension(
             Xnew, self.X, self.distances, self.sigma, self.alpha,
             self.q, self.dms, self.evals)
+    
+    # ToDo: add bandwidth estimator
 
 
 def diffusion_matrix(X, sigma, alpha, distances):
@@ -103,3 +105,21 @@ def oos_extension(Xnew, Xold, distances, sigma, alpha, q, dms, evals):
     dmsnew = Pnew.dot(dms) / evals[None, :]
     dmsnew = np.real(dmsnew)
     return dmsnew
+
+def bandwidth_estimator(X,distances,range_exp = np.arange(-20.,10.)):
+    '''
+    Bandwidth estimator searching for the optimal sigma in 2^range_exp according
+    to the heuristics from: 
+    Berry, Tyrus, and John Harlim. "Variable bandwidth diffusion kernels." 
+    Applied and Computational Harmonic Analysis 40.1 (2016): 68-96.
+    '''
+    
+    sigmas = 2**range_exp # range of sigmas to test
+    sqd = distances.sqdist(X)
+ 
+    log_S = np.array([np.log(np.sum(1/np.size(sqd)*np.exp(-sqd / (2 * s**2)))) for s in sigmas])
+    log_sig =  np.log(sigmas**2) 
+    index = np.argmax((log_S[1:]-log_S[:-1])/(log_sig[1:]-log_sig[:-1]))
+    
+    sigma = sigmas[index]
+    return sigma
