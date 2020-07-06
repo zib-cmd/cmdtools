@@ -3,7 +3,44 @@ import numpy as np
 from scipy.spatial import distance
 
 
-class Gaussian:
+class TransferOperatorGalerkin:
+    """ Class resposible for computing the Monte-Carlo estimates of
+    the Perron-Frobenius and Koopman operators wrt to a given Basis """
+
+    def __init__(self, basis):
+        self.basis = basis
+
+    #def fit(self, trajectory):
+    #    self.coords = self.basis.evaluate(trajectory)
+
+    def koopman(self):
+        """ K = M^-1 S """
+        S, Minv = self.stiffness(), np.inv(self.mass())
+        return np.dot(Minv, S)
+
+    def perronfrobenius(self):
+        """ P = S^T M^-1 = K^T """
+        return self.koopman().T
+
+    def mass(self):
+        """ M_ij = 1/n sum_k=(0,...,n) X_ki X_kj """
+        X = self.coords # TODO: use only first n-1 samples for rowstoch?
+        nsamples = np.size(X, 0)
+        return np.dot(X.T, X) / nsamples
+
+    def stiffness(self):
+        """ S_ij = 1/n sum_k=(0,...,n-1) X_(k+1,i) X_kj """
+        X = self.coords[:-1, :]
+        Y = self.coords[1:, :]
+        nsamples = np.size(X, 0)
+        return np.dot(X.T, Y) / nsamples
+
+
+class Basis:
+    pass
+
+
+class Gaussian(Basis):
     def __init__(self, timeseries,
                  centers=None, sqd=None, sigma=None, percentile=50):
         self.timeseries = timeseries
