@@ -52,6 +52,8 @@ class GridTrajectory:
 
 
 def getboxes(traj, lims=None, ns=1):
+    if traj.ndim == 1:
+        traj = traj.reshape(np.size(traj), 1)
     if lims is None:
         mins = np.min(traj, 0)
         maxs = np.max(traj, 0)
@@ -59,7 +61,7 @@ def getboxes(traj, lims=None, ns=1):
     else:
         lims = np.array(lims)
     if np.isscalar(ns):
-        ns = np.repeat(ns, np.shape(traj)[0])
+        ns = np.repeat(ns, np.size(traj, 1))
     else:
         ns = np.array(ns)
 
