@@ -59,7 +59,7 @@ def getboxes(traj, lims=None, ns=1):
     else:
         lims = np.array(lims)
     if np.isscalar(ns):
-        ns = np.repeat(ns, np.size(traj, 1))
+        ns = np.repeat(ns, np.shape(traj)[0])
     else:
         ns = np.array(ns)
 
