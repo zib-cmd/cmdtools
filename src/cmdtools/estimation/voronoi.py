@@ -73,6 +73,19 @@ class GridTrajectory:
     def propagator(self, dt=1):
         return propagator(self.traj, len(self.boxinds), dt)
 
+def getboxes(traj, lims=None, ns=1):
+    if traj.ndim == 1:
+        traj = traj.reshape(np.size(traj), 1)
+    if lims is None:
+        mins = np.min(traj, 0)
+        maxs = np.max(traj, 0)
+        lims = np.vstack((mins, maxs)).T
+    else:
+        lims = np.array(lims)
+    if np.isscalar(ns):
+        ns = np.repeat(ns, np.size(traj, 1))
+    else:
+        ns = np.array(ns)
 
 def boxtrajinds(traj, lims=None, ns=1):
     scale = lims[:, 1] - lims[:, 0]

@@ -48,12 +48,14 @@ class DiffusionMaps:
         self.distances = distances
         self.n = n
 
-        if sigma == 'estimate':
-            self.sigma = self.bandwidth_estimator()
-        elif isinstance(sigma, np.ndarray):
+        if isinstance(sigma, np.ndarray):
             self.sigma = self.bandwidth_estimator(range_exp=sigma)
-        else:
+        elif isinstance(sigma, int) or isinstance(sigma, float):
             self.sigma = sigma
+        elif sigma == 'estimate':
+            self.sigma = self.bandwidth_estimator()
+        else:
+            print('Did not recognize the given sigma.')
 
         self.diffusion_matrix()
         self.diffusionmaps()
