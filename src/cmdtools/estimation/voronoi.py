@@ -2,7 +2,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import KMeans
 import numpy as np
 from .. import utils
-from picking_algorithm import picking_algorithm
+from .picking_algorithm import picking_algorithm
 
 
 class VoronoiTrajectory:
