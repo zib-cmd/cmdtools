@@ -42,7 +42,7 @@ def by_kmeans(X, n):
 
 def by_picking(X, n):
     centers, _, d = picking_algorithm(X, n)
-    inds = np.argmax(d, axis=1)
+    inds = np.argmin(d, axis=1)
     return centers, inds
 
 
