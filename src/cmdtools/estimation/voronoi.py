@@ -6,7 +6,7 @@ from .picking_algorithm import picking_algorithm
 
 
 class VoronoiTrajectory:
-    def __init__(self, traj, centers='kmeans', n=1):
+    def __init__(self, traj, n, centers='kmeans'):
         self.traj = traj
         if centers == 'kmeans':
             self.centers, self.inds = by_kmeans(traj, n)
