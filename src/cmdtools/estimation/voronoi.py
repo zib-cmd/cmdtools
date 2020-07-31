@@ -47,7 +47,9 @@ def by_picking(X, n):
 
 
 class GridTrajectory:
-    def __init__(self, traj, lims, ns):
+    def __init__(self, traj, lims=None, ns=1):
+        if traj.ndim == 1:
+            traj = traj.reshape(np.size(traj), 1)
         if lims is None:
             mins = np.min(traj, 0)
             maxs = np.max(traj, 0)
@@ -68,26 +70,13 @@ class GridTrajectory:
 
         self.boxinds = b
         self.centers = boxcenters(b, lims, ns)
-        self.traj = ti
+        self.traj = ti # todo: rename, I find the name confusing since its not the traj but assigned indexes
 
     def propagator(self, dt=1):
         return propagator(self.traj, len(self.boxinds), dt)
 
-def getboxes(traj, lims=None, ns=1):
-    if traj.ndim == 1:
-        traj = traj.reshape(np.size(traj), 1)
-    if lims is None:
-        mins = np.min(traj, 0)
-        maxs = np.max(traj, 0)
-        lims = np.vstack((mins, maxs)).T
-    else:
-        lims = np.array(lims)
-    if np.isscalar(ns):
-        ns = np.repeat(ns, np.size(traj, 1))
-    else:
-        ns = np.array(ns)
 
-def boxtrajinds(traj, lims=None, ns=1):
+def boxtrajinds(traj, lims, ns):
     scale = lims[:, 1] - lims[:, 0]
     normalized = (traj - lims[:, 0]) / scale
     n = np.size(traj, 0)
