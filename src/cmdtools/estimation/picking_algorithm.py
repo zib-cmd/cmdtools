@@ -3,7 +3,7 @@ import numpy as np
 import scipy.spatial.distance as dist
 
 
-def picking_algorithm(X, n, metric='euclidean'):
+def picking_algorithm(X, n, metric='sqeuclidean'):
     """Picking algorithm (Durmaz, 2016)
 
     Pick out n points such that the respective minimal distance
