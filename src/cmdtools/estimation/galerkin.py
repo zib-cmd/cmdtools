@@ -3,7 +3,44 @@ import numpy as np
 from scipy.spatial import distance
 
 
-class Gaussian:
+class TransferOperatorGalerkin:
+    """ Class resposible for computing the Monte-Carlo estimates of
+    the Perron-Frobenius and Koopman operators wrt to a given Basis """
+
+    def __init__(self, basis):
+        self.basis = basis
+
+    # def fit(self, trajectory):
+    #     self.coords = self.basis.evaluate(trajectory)
+
+    def koopman(self):
+        """ K = M^-1 S """
+        S, Minv = self.stiffness(), np.inv(self.mass())
+        return np.dot(Minv, S)
+
+    def perronfrobenius(self):
+        """ P = S^T M^-1 = K^T """
+        return self.koopman().T
+
+    def mass(self):
+        """ M_ij = 1/n sum_k=(0,...,n) X_ki X_kj """
+        X = self.coords  # TODO: use only first n-1 samples for rowstoch?
+        nsamples = np.size(X, 0)
+        return np.dot(X.T, X) / nsamples
+
+    def stiffness(self):
+        """ S_ij = 1/n sum_k=(0,...,n-1) X_(k+1,i) X_kj """
+        X = self.coords[:-1, :]
+        Y = self.coords[1:, :]
+        nsamples = np.size(X, 0)
+        return np.dot(X.T, Y) / nsamples
+
+
+class Basis:
+    pass
+
+
+class Gaussian(Basis):
     def __init__(self, timeseries,
                  centers=None, sqd=None, sigma=None, percentile=50):
         self.timeseries = timeseries
@@ -69,37 +106,38 @@ def membership(sqd, sigma):
     return utils.rowstochastic(m)
 
 
-def sqdist(timeseries, centers):
-    return distance.cdist(timeseries, centers, distance.sqeuclidean)
+def sqdist(timeseries, centers, metric='sqeuclidean'):
+    d = distance.cdist(timeseries, centers, metric)
+    sqd = d if metric == 'sqeuclidean' else d**2
+    return sqd
 
 
 def find_bandwidth(sqd, percentile=50):
     """
 
     Given the square-distance matrix d_ij = (x_i - x_j)^2
-    compute the standard deviation s for a Gaussian kernel
-    k(x_i,x_j) = exp(-1/h d_ij) with bandwidth parameter h = 2s^2.
-    We have h = med^2 / log n based on the intuition that we want
-    sum_j k(x_i, x_j) ≈ n exp(-1/h med^2) = 1
-    where n is the number of points and med the pairwise median distance
+    compute the standard deviation s for the Gaussian kernel
+    k(x_i,x_j) = exp(-1/(2s^2) d_ij).
+    The heuristic is based on the assumption that we want
+    sum_j k(x_i, x_j) ≈ n exp(-1/(2s^2) med^2) = 1 and hence
+    (2s^2) = med^2 / log n  where n is the number of points and
+    med the pairwise median distance.
 
-    Percentile allows to shift from the median to an arbitrary percentage and
+    percentile allows to shift from the median to an arbitrary percentage and
     thus influences how many points have an influence on the bandwith.
 
-    Reference:
-    "Stein Variational Gradient Descent:
-    A General Purpose Bayesian Inference Algorithm",
-    Qiang Liu and Dilin Wang (2016).
+    Heuristic taken from "Stein Variational Gradient Descent [...],
+    Qiang Liu and Dilin Wang (2016)".
 
     Input:
         sqd: matrix, pairwise squared-distances of the samples
-        percentile: int [0,100], amount of samples to be in the "horizon" of h
+        percentile: float [0,100], percentile to use instead of median
 
      Output:
          sigma: float, the standard deviation of the Gaussian
     """
 
     n = np.size(sqd, 1)
-    h = np.percentile(sqd, percentile)**2 / np.log(n)
+    h = np.percentile(sqd, percentile) / np.log(n)
     sigma = np.sqrt(h/2)
     return sigma

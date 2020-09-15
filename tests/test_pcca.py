@@ -34,7 +34,8 @@ def test_scipyschur(n=10, m=3):
     X2 = solver.solve(T, m, massmatrix)
 
     # check if X1 and X2 span the same space
-    assert np.linalg.matrix_rank(np.hstack([X1, X2])) == m
+    tol = 1e-12
+    assert np.linalg.matrix_rank(np.hstack([X1, X2]), tol) == m
 
 
 # test whether krylovschur is doing the same as scipyschur
@@ -57,15 +58,15 @@ M_BENCHMARK = 10
 
 def test_bench_scipyschur(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):
     T = utils.randompropagator(n)
-    massmatrix = np.diag(np.ones(n))
     solver = pcca.ScipySchur()
-    benchmark(solver.solve, T, m, massmatrix)
+    benchmark(solver.solve, T, m)
 
 
 def test_bench_scipyqz(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):
     T = utils.randompropagator(n)
+    massmatrix = np.diag(np.ones(n))
     solver = pcca.ScipySchur()
-    benchmark(solver.solve, T, m)
+    benchmark(solver.solve, T, m, massmatrix)
 
 
 def test_bench_krylovschur(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):
