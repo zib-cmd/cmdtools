@@ -1,4 +1,6 @@
-from cmdtools.estimation.diffusionmaps import *
+from cmdtools.estimation.diffusionmaps import DiffusionMaps, NNDistances
+import numpy as np
+
 
 def test_diffusionmaps():
     X = np.random.rand(100, 5)

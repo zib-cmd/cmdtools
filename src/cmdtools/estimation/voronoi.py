@@ -70,7 +70,7 @@ class GridTrajectory:
 
         self.boxinds = b
         self.centers = boxcenters(b, lims, ns)
-        self.traj = ti # todo: rename, I find the name confusing since its not the traj but assigned indexes
+        self.traj = ti  # todo: rename, I find the name confusing since its not the traj but assigned indexes
 
     def propagator(self, dt=1):
         return propagator(self.traj, len(self.boxinds), dt)
@@ -105,9 +105,3 @@ def boxcenters(inds, lims, ns):
     for i in range(len(inds)):
         coords[i, :] = lims[:, 0] + (1/ns) * (unrav[:, i] + 1/2) * scale
     return coords
-
-
-inds = [0, 1, 2]
-lims = [[0, 1]]
-ns = [3]
-

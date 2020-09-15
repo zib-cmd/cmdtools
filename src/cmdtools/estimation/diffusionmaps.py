@@ -127,8 +127,8 @@ def bandwidth_estimator(X, distances, range_exp):
     sigmas = 2**range_exp  # range of sigmas
     sqd = distances.sqdist(X)
 
-    log_S = np.array([np.log(np.sum(1/np.size(sqd) *
-                                np.exp(-sqd / (2 * s**2)))) for s in sigmas])
+    log_S = np.array([np.log(np.sum(1/np.size(sqd)
+                             * np.exp(-sqd / (2 * s**2)))) for s in sigmas])
     log_sig = np.log(sigmas**2)
     index = np.argmax((log_S[1:]-log_S[:-1])/(log_sig[1:]-log_sig[:-1]))
 

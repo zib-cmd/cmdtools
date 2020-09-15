@@ -10,8 +10,8 @@ class TransferOperatorGalerkin:
     def __init__(self, basis):
         self.basis = basis
 
-    #def fit(self, trajectory):
-    #    self.coords = self.basis.evaluate(trajectory)
+    # def fit(self, trajectory):
+    #     self.coords = self.basis.evaluate(trajectory)
 
     def koopman(self):
         """ K = M^-1 S """
@@ -24,7 +24,7 @@ class TransferOperatorGalerkin:
 
     def mass(self):
         """ M_ij = 1/n sum_k=(0,...,n) X_ki X_kj """
-        X = self.coords # TODO: use only first n-1 samples for rowstoch?
+        X = self.coords  # TODO: use only first n-1 samples for rowstoch?
         nsamples = np.size(X, 0)
         return np.dot(X.T, X) / nsamples
 
