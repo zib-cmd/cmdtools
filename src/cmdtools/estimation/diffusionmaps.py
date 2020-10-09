@@ -1,4 +1,5 @@
 import scipy.linalg as lin
+import scipy.sparse as spr
 import scipy.spatial.distance as scidist
 import numpy as np
 import warnings
@@ -92,8 +93,8 @@ def diffusion_matrix(X, sigma, alpha, distances):
 
 
 def diffusionmaps(P, n):
-    evals, evecs = lin.eig(P)  # TODO: check/compare with left eigenvectors
-    idx = evals.argsort()[::-1][1:n+1]
+    evals, evecs = spr.linalg.eigs(P, n+1)
+    idx = evals.argsort()[::-1][1:]
     evals = evals[idx]
     evecs = evecs[:, idx]
 
