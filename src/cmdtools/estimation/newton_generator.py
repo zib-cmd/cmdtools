@@ -82,7 +82,7 @@ def Newton_N(B, h, x):
                     big_pi *= (x-i)
             big_sigma += big_pi
 
-        sigma_fin += big_sigma*Deltas[j]/np.float16(factorial(j))
+        sigma_fin += big_sigma*Deltas[j]/np.float32(factorial(j))  # TODO: fix this adhoc cast
 
     return(sigma_fin/h)
 
