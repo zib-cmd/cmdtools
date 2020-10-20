@@ -1,4 +1,5 @@
 import scipy.linalg as lin
+import scipy.sparse as spr
 import scipy.spatial.distance as scidist
 import numpy as np
 import warnings
@@ -33,12 +34,15 @@ class NNDistances(Distances):
         if Y is X or Y is None:
             d = neighbors.kneighbors_graph(
                 X, self.k, mode='distance', metric=self.metric)
+            d = d.toarray()
+            # symmetrize
+            d = d + (d==0)*d.T
         else:
             n = neighbors.NearestNeighbors(metric=self.metric)
             n.fit(Y)
             d = n.kneighbors_graph(X, self.k, mode='distance')
-
-        return d.toarray()  # since we cant deal with sparse so far
+            d = d.toarray()
+        return d
 
 
 class DiffusionMaps:
@@ -47,6 +51,8 @@ class DiffusionMaps:
         self.alpha = alpha
         self.distances = distances
         self.n = n
+        # unnormalized kernel
+        self.sqd = distances.sqdist(self.X)
 
         if isinstance(sigma, np.ndarray):
             self.sigma = self.bandwidth_estimator(range_exp=sigma)
@@ -62,7 +68,7 @@ class DiffusionMaps:
 
     def diffusion_matrix(self):
         self.P, self.q = diffusion_matrix(
-            self.X, self.sigma, self.alpha, self.distances)
+            self.sqd, self.sigma, self.alpha)
 
     def diffusionmaps(self):
         self.dms, self.evals, self.evecs = diffusionmaps(self.P, self.n)
@@ -74,12 +80,11 @@ class DiffusionMaps:
 
     def bandwidth_estimator(self, range_exp=np.arange(-20., 10.)):
         return bandwidth_estimator(
-            self.X, self.distances, range_exp)
+            self.sqd, range_exp)
 
 
-def diffusion_matrix(X, sigma, alpha, distances):
-    # unnormalized kernel
-    sqd = distances.sqdist(X)
+def diffusion_matrix(sqd, sigma, alpha):
+
     K = np.exp(-sqd / (2 * sigma**2))
 
     # pre normalization
@@ -92,8 +97,9 @@ def diffusion_matrix(X, sigma, alpha, distances):
 
 
 def diffusionmaps(P, n):
-    evals, evecs = lin.eig(P)  # TODO: check/compare with left eigenvectors
-    idx = evals.argsort()[::-1][1:n+1]
+    #P=spr.csc_matrix(P)
+    evals, evecs = spr.linalg.eigs(P, n+1, which = 'LR') # largest real value
+    idx = evals.argsort()[::-1][1:]
     evals = evals[idx]
     evecs = evecs[:, idx]
 
@@ -117,7 +123,7 @@ def oos_extension(Xnew, Xold, distances, sigma, alpha, q, dms, evals):
     return dmsnew
 
 
-def bandwidth_estimator(X, distances, range_exp):
+def bandwidth_estimator(sqd, range_exp):
     '''
     Bandwidth estimator searching for the optimal sigma in 2^range_exp
     according to the heuristics from:
@@ -125,7 +131,6 @@ def bandwidth_estimator(X, distances, range_exp):
     Applied and Computational Harmonic Analysis 40.1 (2016): 68-96.
     '''
     sigmas = 2**range_exp  # range of sigmas
-    sqd = distances.sqdist(X)
 
     log_S = np.array([np.log(np.sum(1/np.size(sqd)
                              * np.exp(-sqd / (2 * s**2)))) for s in sigmas])
