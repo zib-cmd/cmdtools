@@ -127,7 +127,6 @@ def krylovschur(A, n, massmatrix=None, onseperation="continue"):
     if onseperation != "continue":
         raise NotImplementedError
 
-    from petsc4py import PETSc
     from slepc4py import SLEPc
     M = petsc_matrix(A)
     E = SLEPc.EPS().create()
@@ -142,10 +141,10 @@ def krylovschur(A, n, massmatrix=None, onseperation="continue"):
 def petsc_matrix(A):
     from scipy import sparse
     from petsc4py import PETSc
-    from slepc4py import SLEPc
 
     M = PETSc.Mat()
-    if sparse.isspmatrix_csr(A):
+    if sparse.issparse(A):
+        A = sparse.csr_matrix(A)
         nrows = np.size(A, 0)
         M.createAIJWithArrays(nrows, (A.indptr, A.indices, A.data))
     else:
