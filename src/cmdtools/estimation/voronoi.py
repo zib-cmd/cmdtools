@@ -48,7 +48,18 @@ def by_picking(X, n):
     return centers, inds
 
 
-class GridTrajectory:
+class SparseBoxes:
+    """ Sparse box representation of a trajectory.
+    Given a trajectory of n points in m-dimensional space,
+    assign its points to the boxes of a regular grid and compute the associated transfer operator.
+    The trajectory is represented in a sparse form, only storing boxes which are visited.
+
+    Args:
+        traj (ndarray): (n x m) array containing the sequential points of the trajectory
+        lims (ndarray): (m x 2) array containing the minima and maxima of of the grid in the respective m dimensions
+        ns (scalar, ndarray): number of boxes in each respective (or all) dimensions
+    """
+
     def __init__(self, traj, lims=None, ns=1):
         if traj.ndim == 1:
             traj = traj.reshape(np.size(traj), 1)
@@ -66,19 +77,20 @@ class GridTrajectory:
             ns = np.array(ns)
         self.ns = ns
 
-        bti = boxtrajinds(traj, lims, ns)
-        b, ti = np.unique(bti, return_inverse=True)
-        # b[ti] == bti
+        bti = boxtrajinds(traj, lims, ns) # assignment of each traj. to the enumeration of dense cells
+        b, ti = np.unique(bti, return_inverse=True) # assignment to sparse cells
+        # assert b[ti] == bti
 
-        self.boxinds = b
-        self.centers = boxcenters(b, lims, ns)
-        self.traj = ti  # todo: rename, I find the name confusing since its not the traj but assigned indexes
+        self.boxinds = b # boxinds[i] contains the dense index of the j-th sparse cell
+        self.centers = boxcenters(b, lims, ns) # the coordinates corresponding to the sparse cells
+        self.traj = ti  # trajectory in terms of the sparse cell enumeration
 
     def propagator(self, dt=1):
         return propagator(self.traj, len(self.boxinds), dt)
 
 
 def boxtrajinds(traj, lims, ns):
+    """ given n points in m-d space, return the indices of the dense boxes """
     scale = lims[:, 1] - lims[:, 0]
     normalized = (traj - lims[:, 0]) / scale
     n = np.size(traj, 0)
@@ -99,6 +111,7 @@ def boxtrajinds(traj, lims, ns):
 
 
 def boxcenters(inds, lims, ns):
+    """ given the indices of the dense boxes, return their centers' coordinates """
     lims = np.array(lims)
     ns   = np.array(ns)
     coords = np.empty((len(inds), len(ns)))
