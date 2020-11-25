@@ -30,8 +30,8 @@ def example_metastab4():
     """
     T = [[.9, .1, 0, 0],     # metastable A
          [.5, 0, .25, .25],  # transition
-         [0, .1, 0, .9],     # metastable B
-         [0, .1, .9, 0]]     # metastable B
+         [0, .1, .5, .4],     # metastable B
+         [0, .1, .4, .5]]     # metastable B
     return T
 
 
