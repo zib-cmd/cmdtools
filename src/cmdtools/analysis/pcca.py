@@ -11,24 +11,29 @@ try:
 except ImportError:
     HAS_SLEPC = False
 
+DEFAULT_WHICH = "LM"
+DEFAULT_ONSEPERATION = "warn"
+
 # Class interfaces
 # These are mainly wrappers around the functions below
 
 
 class KrylovSchur:
-    def __init__(self, onseperation="warn"):
+    def __init__(self, onseperation=DEFAULT_ONSEPERATION, which=DEFAULT_WHICH):
         self.onseperation = onseperation
+        self.which = which
 
     def solve(self, A, n, massmatrix=None):
-        return krylovschur(A, n, massmatrix, self.onseperation)
+        return krylovschur(A, n, massmatrix, self.onseperation, self.which)
 
 
 class ScipySchur:
-    def __init__(self, onseperation="warn"):
+    def __init__(self, onseperation=DEFAULT_ONSEPERATION, which=DEFAULT_WHICH):
         self.onseperation = onseperation
+        self.which = which
 
     def solve(self, T, n, massmatrix=None):
-        return scipyschur(T, n, massmatrix, self.onseperation)
+        return scipyschur(T, n, massmatrix, self.onseperation, self.which)
 
 
 class PCCA:
@@ -90,11 +95,20 @@ def gramschmidt(X, pi):
     return X
 
 
-def scipyschur(T, n, massmatrix=None, onseperation="warn"):
-    e = np.sort(np.linalg.eigvals(T))
+def scipyschur(T, n, massmatrix=None, onseperation="warn", which=DEFAULT_WHICH):
 
-    v_in  = np.real(e[-n])
-    v_out = np.real(e[-(n + 1)])
+    if which == "LM":
+        def sortfun(x):
+            return np.abs(x)
+    elif which == "LR":
+        def sortfun(x):
+            return np.real(x)
+    else:
+        raise NotImplementedError("the choice of `which` is not supported")
+
+    e = np.sort(sortfun(np.linalg.eigvals(T)))
+    v_in  = e[-n]
+    v_out = e[-(n + 1)]
 
     # do not seperate conjugate eigenvalues
     if np.isclose(v_in, v_out):
@@ -113,15 +127,16 @@ def scipyschur(T, n, massmatrix=None, onseperation="warn"):
 
     # schur decomposition
     if massmatrix is None:
-        _, X, _ = schur(T, sort=lambda x: np.real(x) > cutoff)
+        # NOTE: assuming that the sort callable is passed complex numbers as (a,b) is undocumented behaviour
+        _, X, _ = schur(T, sort=lambda a, b: sortfun(complex(a, b)) > cutoff)
     else:
         _, _, _, _, _, X = \
-            ordqz(T, massmatrix, sort=lambda a, b: np.real(a / b) > cutoff)
+            ordqz(T, massmatrix, sort=lambda a, b: sortfun(a/b) > cutoff)
 
     return X[:, 0:n]  # use only first n vectors
 
 
-def krylovschur(A, n, massmatrix=None, onseperation="continue"):
+def krylovschur(A, n, massmatrix=None, onseperation="continue", which=DEFAULT_WHICH):
     if massmatrix is not None:
         raise NotImplementedError
     if onseperation != "continue":
@@ -132,7 +147,12 @@ def krylovschur(A, n, massmatrix=None, onseperation="continue"):
     E = SLEPc.EPS().create()
     E.setOperators(M)
     E.setDimensions(nev=n)
-    E.setWhichEigenpairs(E.Which.LARGEST_REAL)
+    if which == "LR":
+        E.setWhichEigenpairs(E.Which.LARGEST_REAL)
+    elif which == "LM":
+        E.setWhichEigenpairs(E.Which.LARGEST_MAGNITUDE)
+    else:
+        raise NotImplementedError("the choice of `which` is not supported")
     E.solve()
     X = np.column_stack([x.array for x in E.getInvariantSubspace()])
     return X[:, :n]

@@ -39,7 +39,7 @@ def test_scipyschur(n=10, m=3):
 
 
 # test whether krylovschur is doing the same as scipyschur
-def test_krylovschur(n=30, m=5, N=100):
+def test_krylovschur(n=10, m=5, N=100):
     if pcca.HAS_SLEPC:
         for i in range(N):
             A = utils.randompropagator(n, reversible=False)
@@ -48,7 +48,7 @@ def test_krylovschur(n=30, m=5, N=100):
             except RuntimeError:
                 continue
             K = pcca.krylovschur(A, m)
-            R = np.linalg.matrix_rank(np.concatenate([S, K], axis=1), tol=1e-6)
+            R = np.linalg.matrix_rank(np.concatenate([S, K], axis=1), tol=1e-12)
             assert R == m
 
 
