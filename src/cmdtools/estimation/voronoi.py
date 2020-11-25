@@ -8,12 +8,14 @@ from .picking_algorithm import picking_algorithm
 class VoronoiTrajectory:
     def __init__(self, traj, n, centers='kmeans'):
         self.traj = traj
-        if centers == 'kmeans':
+        if not np.isscalar(centers): # we pass an array
+            self.centers, self.inds = by_nn(traj, centers)
+        elif centers == 'kmeans':
             self.centers, self.inds = by_kmeans(traj, n)
         elif centers == 'picking':
             self.centers, self.inds = by_picking(traj, n)
         else:
-            self.centers, self.inds = by_nn(traj, centers)
+            raise ValueError("invalid centers")
 
     def propagator(self, dt=1):
         return propagator(self.inds, np.size(self.centers, 0), dt)
