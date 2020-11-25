@@ -36,7 +36,7 @@ class NNDistances(Distances):
                 X, self.k, mode='distance', metric=self.metric)
             d = d.toarray()
             # symmetrize
-            d = d + (d==0)*d.T
+            d = d + (d == 0)*d.T
         else:
             n = neighbors.NearestNeighbors(metric=self.metric)
             n.fit(Y)
@@ -97,8 +97,8 @@ def diffusion_matrix(sqd, sigma, alpha):
 
 
 def diffusionmaps(P, n):
-    #P=spr.csc_matrix(P)
-    evals, evecs = spr.linalg.eigs(P, n+1, which = 'LR') # largest real value
+    # P=spr.csc_matrix(P)
+    evals, evecs = spr.linalg.eigs(P, n+1, which='LR')  # largest real value
     idx = evals.argsort()[::-1][1:]
     evals = evals[idx]
     evecs = evecs[:, idx]

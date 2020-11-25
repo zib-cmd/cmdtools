@@ -8,7 +8,7 @@ from .picking_algorithm import picking_algorithm
 class VoronoiTrajectory:
     def __init__(self, traj, n, centers='kmeans'):
         self.traj = traj
-        if not np.isscalar(centers): # we pass an array
+        if not np.isscalar(centers):  # we pass an array
             self.centers, self.inds = by_nn(traj, centers)
         elif centers == 'kmeans':
             self.centers, self.inds = by_kmeans(traj, n)
@@ -77,12 +77,12 @@ class SparseBoxes:
             ns = np.array(ns)
         self.ns = ns
 
-        bti = boxtrajinds(traj, lims, ns) # assignment of each traj. to the enumeration of dense cells
-        b, ti = np.unique(bti, return_inverse=True) # assignment to sparse cells
+        bti = boxtrajinds(traj, lims, ns)  # assignment of each traj. to the enumeration of dense cells
+        b, ti = np.unique(bti, return_inverse=True)  # assignment to sparse cells
         # assert b[ti] == bti
 
-        self.boxinds = b # boxinds[i] contains the dense index of the j-th sparse cell
-        self.centers = boxcenters(b, lims, ns) # the coordinates corresponding to the sparse cells
+        self.boxinds = b  # boxinds[i] contains the dense index of the j-th sparse cell
+        self.centers = boxcenters(b, lims, ns)  # the coordinates corresponding to the sparse cells
         self.traj = ti  # trajectory in terms of the sparse cell enumeration
 
     def propagator(self, dt=1):
