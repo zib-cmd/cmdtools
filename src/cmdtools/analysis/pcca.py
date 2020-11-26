@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.linalg import schur, ordqz
 from .optimization import Optimizer
 from ..utils import get_pi
 import warnings
@@ -52,31 +51,15 @@ class PCCA:
         T, n, pi, massmatrix, eigensolver, optimizer = self.T, self.n, \
             self.pi, self.massmatrix, self.eigensolver, self.optimizer
 
-        chi, X, A, = \
-            _pcca(T, n, pi, massmatrix, eigensolver, optimizer)
+        X = eigensolver.solve(T, n, massmatrix)
+        X = gramschmidt(X, pi)
+        A = optimizer.solve(X, pi)
+        chi = np.dot(X, A)
 
         self.chi, self.X, self.A = chi, X, A
-        return chi
 
-
-# Functions
-# the logic of the above classes following a more functional style
-
-
-# compatibility to old functioncalls / tests
-def pcca(T, n, pi="uniform"):
-    p = PCCA(T, n, pi)
-    return p.solve()
-
-
-# this will be the new pcca function, the old function is replaced by the Class
-def _pcca(T, n, pi, massmatrix, eigensolver, optimizer):
-    X = eigensolver.solve(T, n, massmatrix)
-    X = gramschmidt(X, pi)
-    A = optimizer.solve(X, pi)
-    chi = np.dot(X, A)
-    return chi, X, A
-
+def pcca(T, n, **kwargs):
+    return PCCA(T, n, **kwargs).chi
 
 def gramschmidt(X, pi):
     """Gram Schmidt orthogonalization wrt. scalar product induced by pi"""
