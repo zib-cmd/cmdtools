@@ -7,14 +7,15 @@ from .picking_algorithm import picking_algorithm
 
 
 class VoronoiTrajectory:
-    def __init__(self, traj, n, centers='kmeans'):
+    def __init__(self, traj, n, centers='kmeans', metric='sqeuclidean'):
         self.traj = traj
+        self.metric = metric
         if not np.isscalar(centers):  # we pass an array
-            self.centers, self.inds = by_nn(traj, centers)
+            self.centers, self.inds = by_nn(traj, centers, metric)
         elif centers == 'kmeans':
-            self.centers, self.inds = by_kmeans(traj, n)
+            self.centers, self.inds = by_kmeans(traj, n, metric)
         elif centers == 'picking':
-            self.centers, self.inds = by_picking(traj, n)
+            self.centers, self.inds = by_picking(traj, n, metric)
         else:
             raise ValueError("invalid centers")
 
@@ -32,22 +33,24 @@ def propagator(inds, nstates, dt):
     return utils.rowstochastic(P)
 
 
-def by_nn(X, centers):
-    inds = (NearestNeighbors()
+def by_nn(X, centers, metric='sqeuclidean'):
+    inds = (NearestNeighbors(metric=metric)
             .fit(centers).kneighbors(X, 1, False)
             .reshape(-1))
     return centers, inds
 
 
-def by_kmeans(X, n):
+def by_kmeans(X, n, metric='sqeuclidean'):
+    if metric not in ["sqeuclidean", "euclidean"]:
+        raise ValueError("KMeans only supports (sq)euclidean metric")
     k = KMeans(n_clusters=n).fit(X)
     inds = k.labels_
     centers = k.cluster_centers_
     return centers, inds
 
 
-def by_picking(X, n):
-    centers, _, d = picking_algorithm(X, n)
+def by_picking(X, n, metric='sqeuclidean'):
+    centers, _, d = picking_algorithm(X, n, metric)
     inds = np.argmin(d, axis=1)
     return centers, inds
 
