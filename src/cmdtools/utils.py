@@ -39,6 +39,7 @@ def is_rowstochastic(P):
     return np.isclose(P.sum(axis=1), 1).all() and \
         (P >= -1e-12).all()
 
+
 def is_generator(Q):
     """ check necessary conditions for Q being a generator (not sufficient) """
     return np.allclose(Q.sum(axis=1), 0)
@@ -47,3 +48,13 @@ def is_generator(Q):
 def order_membership(m):
     """ order the membership matrix, `first comes first` """
     return m[:, np.argsort(np.argmax(m, axis=0))]
+
+
+def euclidean_torus(periods):
+    """ euclidean metric on a d-dimensional torus with given periods.
+    using np.inf for a specific period corresponds to the usual euclidean distance in that dimension """
+    def metric(x,y):
+        d = x-y
+        d = np.minimum(d % periods, -d % periods)
+        return np.sqrt(np.sum(d**2))
+    return metric
