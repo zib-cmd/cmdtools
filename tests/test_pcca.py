@@ -2,6 +2,7 @@ from cmdtools import utils
 from cmdtools.analysis import pcca
 from cmdtools.analysis import schur
 import numpy as np
+import pytest
 
 
 def test_random():
@@ -19,8 +20,10 @@ def test_example_n2():
 
 
 def test_example_n3():
+
     T = utils.example_metastab4()
-    m = pcca.pcca(T, 3)
+    with pytest.warns(RuntimeWarning):
+        m = pcca.pcca(T, 3)
     m = utils.order_membership(m)
     expected = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 1]]
     assert np.isclose(m, expected).all()
