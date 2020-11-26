@@ -32,12 +32,16 @@ def example_metastab4():
          [.5, 0, .25, .25],  # transition
          [0, .1, .5, .4],     # metastable B
          [0, .1, .4, .5]]     # metastable B
-    return T
+    return np.array(T)
 
 
 def is_rowstochastic(P):
     return np.isclose(P.sum(axis=1), 1).all() and \
         (P >= -1e-12).all()
+
+def is_generator(Q):
+    """ check necessary conditions for Q being a generator (not sufficient) """
+    return np.allclose(Q.sum(axis=1), 0)
 
 
 def order_membership(m):

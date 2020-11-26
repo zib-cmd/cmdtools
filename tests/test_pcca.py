@@ -1,5 +1,6 @@
 from cmdtools import utils
 from cmdtools.analysis import pcca
+from cmdtools.analysis import schur
 import numpy as np
 
 
@@ -40,14 +41,14 @@ def test_scipyschur(n=10, m=3):
 
 # test whether krylovschur is doing the same as scipyschur
 def test_krylovschur(n=10, m=5, N=100):
-    if pcca.HAS_SLEPC:
+    if schur.HAS_SLEPC:
         for i in range(N):
             A = utils.randompropagator(n, reversible=False)
             try:
-                S = pcca.scipyschur(A, m, onseperation="error")
+                S = schur.scipyschur(A, m, onseperation="error")
             except RuntimeError:
                 continue
-            K = pcca.krylovschur(A, m)
+            K = schur.krylovschur(A, m, onseperation="continue")
             R = np.linalg.matrix_rank(np.concatenate([S, K], axis=1), tol=1e-12)
             assert R == m
 
