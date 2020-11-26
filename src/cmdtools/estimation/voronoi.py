@@ -1,5 +1,6 @@
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import KMeans
+from warnings import warn
 import numpy as np
 from .. import utils
 from .picking_algorithm import picking_algorithm
@@ -25,6 +26,9 @@ def propagator(inds, nstates, dt):
     P = np.zeros((nstates, nstates))
     for i in range(len(inds)-dt):
         P[inds[i], inds[i+dt]] += 1
+    P = utils.rowstochastic(P)
+    if not utils.is_rowstochastic(P):
+        warn("Estimated propagator is not row-stochastic. Possibly ergodicity is not satisfied, consider more samples or a coarser resolution")
     return utils.rowstochastic(P)
 
 
