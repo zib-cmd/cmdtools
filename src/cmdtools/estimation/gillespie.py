@@ -20,7 +20,7 @@ def gillespie(Q, x0, n_iter):
 
 def stroboscopic_inds(ts):
     """ given a sorted array of times, return the indices to the last times before each unit time step """
-    return(np.searchsorted(ts, np.arange(np.max(x)+1),side="right")-1)
+    return(np.searchsorted(ts, np.arange(np.max(ts)+1),side="right")-1)
 
 
 def propagator(xs, ts, nstates):
