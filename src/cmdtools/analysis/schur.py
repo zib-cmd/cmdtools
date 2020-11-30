@@ -1,6 +1,7 @@
 import numpy as np
 import warnings
 from scipy.linalg import schur, ordqz
+from scipy import sparse
 from ..utils import is_generator, is_rowstochastic
 
 # TODO: find a better solution to this
@@ -14,7 +15,6 @@ DEFAULT_WHICH = "auto"
 DEFAULT_ONSEPERATION = "warn"
 
 def parse_which(A, which):
-    print(which)
     if which != "auto":
         return which
     if is_rowstochastic(A):
@@ -52,6 +52,9 @@ def scipyschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=D
             return np.real(x)
     else:
         raise NotImplementedError("the choice of `which` is not supported")
+
+    if sparse.issparse(A):
+        A = A.toarray()
 
     e = np.sort(sortfun(np.linalg.eigvals(A)))
     v_in  = e[-n]
@@ -108,7 +111,7 @@ def krylovschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=
 
 
 def petsc_matrix(A):
-    from scipy import sparse
+
     from petsc4py import PETSc
 
     M = PETSc.Mat()
