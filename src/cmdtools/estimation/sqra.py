@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.sparse as sp
 
 
 def sqra(u, A, beta, phi):
@@ -14,7 +15,63 @@ def sqra(u, A, beta, phi):
     pi  = np.sqrt(np.exp(- beta * u))  # Boltzmann distribution
     pi /= np.sum(pi)
 
-    D  = np.diag(pi)
-    D1 = np.diag(1 / pi)
-    Q  = phi * D1.dot(A).dot(D)
+    D  = sp.diags(pi)
+    D1 = sp.diags(1 / pi)
+    Q  = phi * D1 @ A @ D
+    Q  = Q - sp.diags(np.array(Q.sum(axis=1)).flatten())
     return Q
+
+def adjacency_nd(dims, torus = False):
+    nd = len(dims)
+    N = np.prod(dims)
+
+    neighbours = np.vstack([np.diag(np.ones(nd, dtype=int)), -np.diag(np.ones(nd, dtype=int))])
+    singletondim = np.array(dims) == 1
+    neighbours[:, singletondim] = 0
+
+    row = np.zeros(N*2*nd, dtype=int)
+    col = np.zeros(N*2*nd, dtype=int)
+    data = np.ones(N*2*nd, dtype=bool)
+    cut = np.zeros(N*2*nd, dtype=bool)
+
+    for i in range(N):
+        multi = np.unravel_index(i, dims) # find multiindex of current cell
+        mn = multi + neighbours # add neighbour offset
+        if not torus:
+            cut[i*2*nd:(i+1)*2*nd] = np.sum((mn < 0) + ( mn >= dims), axis=1) # check if boundary is hit
+        mn = np.mod(multi + neighbours, dims) # glue together boundary
+        neighbour_flat = np.ravel_multi_index(mn.T, dims) # back to flat inds
+        #print(neighbour_flat)
+        row[i*2*nd:(i+1)*2*nd] = i
+        col[i*2*nd:(i+1)*2*nd] = neighbour_flat
+
+    if not torus: # cut out the points which were glued at boundaries
+        sel = ~cut
+        data = data[sel]
+        row = row[sel]
+        col = col[sel]
+
+    #return row, col
+    A = sp.coo_matrix((data, (row, col))).tocsr()
+    A[np.diag_indices_from(A)] = False
+    return A
+
+class SQRA:
+    def __init__(self, u, beta=1, phi=1, A=None, torus=False):
+        self.u = u
+        self.beta = beta
+        self.phi = phi
+
+        self.dims = np.shape(u)
+
+        self.A = adjacency_nd(self.dims, torus) if A is None else A
+        self.Q = self.sqra()
+        self.N = self.Q.shape[0]
+
+    def sqra(self):
+        return sqra(self.u.flatten(), self.A, self.beta, self.phi)
+
+# conversion between coldness (beta) and epsilon in sde formulation
+# necessary for the computation of phi
+def beta_to_epsilon(b):
+    return 2 / b
