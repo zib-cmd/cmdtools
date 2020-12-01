@@ -19,7 +19,7 @@ def sqra(u, A, beta, phi):
     D1 = sp.diags(1 / pi)
     Q  = phi * D1 @ A @ D
     Q  = Q - sp.diags(np.array(Q.sum(axis=1)).flatten())
-    return Q
+    return Q.tocsc()
 
 def adjacency_nd(dims, torus = False):
     nd = len(dims)
@@ -53,7 +53,7 @@ def adjacency_nd(dims, torus = False):
 
     #return row, col
     A = sp.coo_matrix((data, (row, col))).tocsr()
-    A[np.diag_indices_from(A)] = False
+    A[np.diag_indices_from(A)] = False  # todo: this throws an inefficiency warning.
     return A
 
 class SQRA:

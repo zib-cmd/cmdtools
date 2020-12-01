@@ -106,6 +106,7 @@ def krylovschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=
     else:
         raise NotImplementedError("the choice of `which` is not supported")
     E.solve()
+    assert E.getConverged() == 1
     X = np.column_stack([x.array for x in E.getInvariantSubspace()])
     return X[:, :n]
 

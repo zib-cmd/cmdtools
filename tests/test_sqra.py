@@ -1,3 +1,4 @@
+from cmdtools import utils
 from cmdtools.estimation import sqra
 import numpy as np
 
@@ -18,3 +19,7 @@ def test_sqra():
     A = A + A.T
 
     return sqra.sqra(u, A, beta, phi)
+
+def test_SQRA():
+    u = np.random.rand(10)
+    sqra.SQRA(u)
