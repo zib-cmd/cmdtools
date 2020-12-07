@@ -58,3 +58,12 @@ def euclidean_torus(periods):
         d = np.minimum(d % periods, -d % periods)
         return np.sqrt(np.sum(d**2))
     return metric
+
+
+def torus_minus(x, y, periods):
+    """ compute the shortest vector from y to x on the topological torus """
+    d = (x-y)
+    fin = periods < np.inf  # only modulo the glued dimensions
+    d[fin] = d[fin] % periods[fin]  # distance on "the front"
+    d = d - (d > periods / 2) * periods  # distance on "the back"
+    return d
