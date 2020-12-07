@@ -19,7 +19,9 @@ def sqra(u, A, beta, phi):
     D1 = sp.diags(1 / pi)
     Q  = phi * D1 @ A @ D
     Q  = Q - sp.diags(np.array(Q.sum(axis=1)).flatten())
-    return Q.tocsc()
+    if sp.issparse(Q):
+        Q = Q.tocsc()
+    return Q
 
 def adjacency_nd(dims, torus = False):
     nd = len(dims)

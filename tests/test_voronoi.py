@@ -25,5 +25,6 @@ def test_voronoi_equality():
 
 def test_sparseboxes():
     X = np.random.rand(100, 2)
+    X[-1,:] = X[0,:]  # fixes warning about non-ergodicity
     t = voronoi.SparseBoxes(X, ns=5)
     t.propagator()

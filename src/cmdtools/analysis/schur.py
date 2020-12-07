@@ -86,7 +86,7 @@ def scipyschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=D
     return X[:, 0:n]  # use only first n vectors
 
 
-def krylovschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=DEFAULT_WHICH):
+def krylovschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=DEFAULT_WHICH, tolerance=1e-6, maxiter=100):
     which = parse_which(A, which)
 
     if massmatrix is not None:
@@ -99,6 +99,7 @@ def krylovschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=
     E = SLEPc.EPS().create()
     E.setOperators(M)
     E.setDimensions(nev=n)
+    E.setTolerances(tolerance, maxiter)
     if which == "LR":
         E.setWhichEigenpairs(E.Which.LARGEST_REAL)
     elif which == "LM":
@@ -106,7 +107,7 @@ def krylovschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=
     else:
         raise NotImplementedError("the choice of `which` is not supported")
     E.solve()
-    assert E.getConverged() == 1
+    assert E.getConverged() >= n
     X = np.column_stack([x.array for x in E.getInvariantSubspace()])
     return X[:, :n]
 
