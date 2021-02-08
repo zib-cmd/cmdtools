@@ -101,15 +101,16 @@ class AJCS():
         return np.einsum('sti, is -> it', self.holding_probs(), p)
 
     ### SOLVERS FOR THE LINEAR SYSTEM 
-class AugmentedSolver:
-    """ methods for solving the augmented linear system 
-    Ax = b where A is upper triangular block 
-    where K[i,j] containing the blocks and b[i] the corresponding RHS """
+# class AugmentedSolver:
+#     """ methods for solving the augmented linear system 
+#     Ax = b where A is upper triangular block 
+#     where K[i,j] containing the blocks and b[i] the corresponding RHS """
 
-    def __init__(self, K):
-        self.K = K
-        self.nt = np.size(K, axis=0)
-        self.nx = np.size(K[0,0], axis=0)
+#     def __init__(self, K, holdingprobs):
+#         self.K = K
+#         self.holdingprobs = holdingprobs
+#         self.nt = np.size(K, axis=0)
+#         self.nx = np.size(K[0,0], axis=0)
 
     @classmethod
     def backwardsolve(self, K, b):
