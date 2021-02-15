@@ -59,6 +59,19 @@ def adjacency_nd(dims, torus = False):
     return A
 
 class SQRA:
+    """ approximate the generator/rate-matrix Q of the Overdamped-Langevin dynamics
+    Args:
+        u (ndarray): The potential function evaluated at the grid points.
+        beta (float): The inverse temperatur of the system (scales the rates nonlinear).
+        phi (float): Linear scaling factor of the rates (depending on the grid volume).
+        A (matrix, optional): Adjacency matrix of the grid. If left empty, automatically compute it based on the shape of `u`.
+        torus(list of bool): Whether to glue the corresponding dimensions together at their resp. boundaries. Only used in the automatic generation of `A`.
+
+    Attributes:
+        A: Adjacency matrix
+        Q: The computed generator
+    """
+
     def __init__(self, u, beta=1, phi=1, A=None, torus=False):
         self.u = u
         self.beta = beta
