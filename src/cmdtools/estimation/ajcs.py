@@ -154,6 +154,9 @@ class AJCS():
             K[:, i] = self.koopman_system_one(i)[0,:]
         return K
 
+    def koopman(self):
+        return self.koopman_system()
+
     def koopman_system(self):
         return self.koopman_system_all()[0,:,:]
 
@@ -169,7 +172,7 @@ class AJCS():
             K[s,s] += sp.identity(nx)
             b[s] = np.diag(S[s, :])
 
-        K[-1,-1] = sp.identity(nx)
+        K[-1,-1] = sp.identity(nx, format="csr")
 
         q = self.backwardsolve(K, b)
         return q

@@ -53,10 +53,10 @@ def adjacency_nd(dims, torus = False):
         row = row[sel]
         col = col[sel]
 
-    #return row, col
-    A = sp.coo_matrix((data, (row, col))).tocsr()
-    A[np.diag_indices_from(A)] = False  # todo: this throws an inefficiency warning.
-    return A
+    A = sp.coo_matrix((data, (row, col)))
+    A.setdiag(0)
+    return A.tocsr()
+
 
 class SQRA:
     """ approximate the generator/rate-matrix Q of the Overdamped-Langevin dynamics
