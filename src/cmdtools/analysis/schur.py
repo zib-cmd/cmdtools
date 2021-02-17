@@ -6,7 +6,7 @@ from ..utils import is_generator, is_rowstochastic
 
 # TODO: find a better solution to this
 try:
-    import slepc  # noqa: F401
+    import slepc4py  # noqa: F401
     HAS_SLEPC = True
 except ImportError:
     HAS_SLEPC = False
