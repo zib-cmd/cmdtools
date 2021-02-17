@@ -113,13 +113,11 @@ class AJC:
         K = q[:nx, :nx]
         return K
 
-
     def koopman_exp(self):
         K = np.identity(self.nx)
         for i in range(self.nt):
             K = K.dot(expm(self.Q[:,:,i]*self.dt[i]))
         return K
-
 
     def finite_time_hitting_prob(self, n_state):
         """ Compute the probability to hit a given state n_state over the
@@ -142,7 +140,6 @@ class AJC:
 
         p = np.linalg.inv(M).dot(b)
         return p
-
 
     def unflatten(self, x, dims=None):
         if dims is None:

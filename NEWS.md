@@ -1,3 +1,8 @@
+current
+====
+* New augmented jump chain module
+  * Sparse implementation for the computation of the transition kernel, koopman operators and space-time-committors
+
 0.2.1
 =====
 

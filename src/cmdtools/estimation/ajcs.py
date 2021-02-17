@@ -28,7 +28,6 @@ class AJCS():
         self.qt, self.qi = self.qtilde(self.Q)
         self.k, self.H, self.S = self.jumpkernel(self.qt, self.qi, self.dt)
 
-
     @staticmethod
     def jumpkernel(qt, qi, dt):
         """ compute the galerkin discretization of the jump kernel eq[50] """
@@ -43,7 +42,7 @@ class AJCS():
                 H[i, k, k+1:] = (1-s[i, k]) * (1-s[i, k+1:]) * prod
                 H[i, k, k] = s[i, k] + dt[k] * qi[i, k] - 1
 
-        #J = np.einsum('k, ijl, ik, ikl -> ikjl', 1/dt, qt, 1/qi, H)
+        # J = np.einsum('k, ijl, ik, ikl -> ikjl', 1/dt, qt, 1/qi, H)
         J = np.empty((nt, nt), dtype=object)
         S = np.zeros((nt, nt, nx))
         for k in range(nt):
@@ -77,7 +76,7 @@ class AJCS():
     @property
     def km(self):
         if not hasattr(self, "_km"):
-            self._km = flatten_spacetime(self.k) # TODO: find a good way to deal with differing representations
+            self._km = flatten_spacetime(self.k)  # TODO: find a good way to deal with differing representations
         return self._km
 
     # TODO: compute this without falling back to the kernel matrix
@@ -94,13 +93,13 @@ class AJCS():
 
     def holding_probs(self):
         S = (1 - np.cumsum(self.S, axis=1))
-        S = np.moveaxis(np.triu(np.moveaxis(S, 2, 0)), 0, 2) # set entries below (from-to-)diagonal to 0
+        S = np.moveaxis(np.triu(np.moveaxis(S, 2, 0)), 0, 2)  # set entries below (from-to-)diagonal to 0
         return S
 
     def synchronize(self, p):
         return np.einsum('sti, is -> it', self.holding_probs(), p)
 
-    ### SOLVERS FOR THE LINEAR SYSTEM
+    # SOLVERS FOR THE LINEAR SYSTEM
 # class AugmentedSolver:
 #     """ methods for solving the augmented linear system
 #     Ax = b where A is upper triangular block
@@ -132,14 +131,13 @@ class AJCS():
 
         K = - deepcopy(self.k)
         b = np.zeros((nt, nx))
-        S = self.holding_probs()[:,-1,:]
-
+        S = self.holding_probs()[:, -1, :]
 
         for s in range(nt):
-            K[s,s] += sp.identity(nx)
-            b[s][i] = S[s,i]
+            K[s, s] += sp.identity(nx)
+            b[s][i] = S[s, i]
 
-        K[-1,-1] = sp.identity(nx)
+        K[-1, -1] = sp.identity(nx)
         b[-1][:] = 0
         b[-1][i] = 1
 
@@ -151,7 +149,7 @@ class AJCS():
         nx = self.nx
         K = np.zeros((nx, nx))
         for i in range(nx):
-            K[:, i] = self.koopman_system_one(i)[0,:]
+            K[:, i] = self.koopman_system_one(i)[0, :]
         return K
 
     def space_time_committor(self, g):
@@ -169,7 +167,7 @@ class AJCS():
         # A = Id - K
         A = -deepcopy(self.k)
         for i in range(nt):
-                A[i,i] += sp.identity(nx)
+            A[i, i] += sp.identity(nx)
 
         b = np.zeros((nt, nx))
         S = self.holding_probs()
@@ -178,26 +176,25 @@ class AJCS():
         bc_vals = np.zeros(nx)
 
         for t in reversed(range(nt)):
-            bc_inds = np.isfinite(g[t,:]) # indices of currently active boundary cond.
-            bc_time[bc_inds] = t          # update time of last  active boundary cond.
-            bc_vals[bc_inds] = g[t, bc_inds] # and the respective value
+            bc_inds = np.isfinite(g[t, :])  # indices of currently active boundary cond.
+            bc_time[bc_inds] = t           # update time of last  active boundary cond.
+            bc_vals[bc_inds] = g[t, bc_inds]  # and the respective value
 
-            b[t] = S[t, bc_time, range(nx)] * bc_vals # contribution of staying into the next boundary
+            b[t] = S[t, bc_time, range(nx)] * bc_vals  # contribution of staying into the next boundary
 
-            for i in np.where(bc_inds): # fix boundary values
-                A[t,t][i,:] = 0
-                A[t,t][i,i] = 1
-                b[t,i]      = g[t,i]
+            for i in np.where(bc_inds):  # fix boundary values
+                A[t, t][i, :] = 0
+                A[t, t][i, i] = 1
+                b[t, i]      = g[t, i]
 
         q = self.backwardsolve(A, b)
         return q
-
 
     def koopman(self):
         return self.koopman_system()
 
     def koopman_system(self):
-        return self.koopman_system_all()[0,:,:]
+        return self.koopman_system_all()[0, :, :]
 
     def koopman_system_all(self):
         """ solve the koopman system for all target states together """
@@ -205,13 +202,13 @@ class AJCS():
         K = - deepcopy(self.k)
         b = np.zeros((nt, nx, nx))
 
-        S = self.holding_probs()[:,-1,:]
+        S = self.holding_probs()[:, -1, :]
 
         for s in range(nt):
-            K[s,s] += sp.identity(nx)
+            K[s, s] += sp.identity(nx)
             b[s] = np.diag(S[s, :])
 
-        K[-1,-1] = sp.identity(nx, format="csr")
+        K[-1, -1] = sp.identity(nx, format="csr")
 
         q = self.backwardsolve(K, b)
         return q
@@ -243,7 +240,7 @@ class AJCS():
     def finite_time_hitting_probs(self):
         """ finite_time_hitting_probs[i,j] is the probability to hit state j starting in i in the time window of the process """
         # TODO: check if this is indeed the ordering
-        return np.vstack([self.finite_time_hitting_prob(i)[0,:] for i in range(self.nx)]).T
+        return np.vstack([self.finite_time_hitting_prob(i)[0, :] for i in range(self.nx)]).T
 
     def optimize(self, iters=100, penalty=0, x0=None, adaptive=False):
         """ gradient free optimization of the minimal finite time hitting prob """
@@ -256,7 +253,7 @@ class AJCS():
         def obj(x):
             self.lastx = x
             for t in range(j.nt):
-                #jp.Q[t].data = np.maximum(j.Q[t].data + x, 0)  # TODO: ignore diagonal
+                # jp.Q[t].data = np.maximum(j.Q[t].data + x, 0)  # TODO: ignore diagonal
                 jp.Q[t].data = j.Q[t].data + x
             jp.compute()
             o = - min(jp.finite_time_hitting_probs())
@@ -269,8 +266,6 @@ class AJCS():
         res = minimize(obj, x0=x0, method='nelder-mead', options={'maxiter': iters, 'adaptive': adaptive})
         obj(res.x)
         return res, jp
-
-
 
 
 # TODO: this should also work for vectors
@@ -288,9 +283,3 @@ def flatten_spacetime(tensor):
         else:
             M = sp.vstack((M, row))
     return M
-
-
-
-
-
-

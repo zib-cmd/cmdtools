@@ -14,6 +14,7 @@ except ImportError:
 DEFAULT_WHICH = "auto"
 DEFAULT_ONSEPERATION = "warn"
 
+
 def parse_which(A, which):
     if which != "auto":
         return which
@@ -23,6 +24,7 @@ def parse_which(A, which):
         return "LR"
     else:
         raise(ValueError("Given matrix is neither P nor Q matrix"))
+
 
 class KrylovSchur:
     def __init__(self, onseperation=DEFAULT_ONSEPERATION, which=DEFAULT_WHICH, maxiter=1000, tolerance=1e-6):

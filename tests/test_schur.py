@@ -32,7 +32,6 @@ def test_bench_scipyschur(benchmark, n=N_BENCHMARK, m=M_BENCHMARK):
     benchmark(solver.solve, Q_dense, m)
 
 
-
 @pytest.mark.benchmark(group="schur")
 def test_bench_scipyqz(benchmark):
     n = np.size(Q_sparse, axis=1)

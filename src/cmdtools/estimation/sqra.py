@@ -23,7 +23,8 @@ def sqra(u, A, beta, phi):
         Q = Q.tocsc()
     return Q
 
-def adjacency_nd(dims, torus = False):
+
+def adjacency_nd(dims, torus=False):
     nd = len(dims)
     N = np.prod(dims)
 
@@ -37,17 +38,17 @@ def adjacency_nd(dims, torus = False):
     cut = np.zeros(N*2*nd, dtype=bool)
 
     for i in range(N):
-        multi = np.unravel_index(i, dims) # find multiindex of current cell
-        mn = multi + neighbours # add neighbour offset
+        multi = np.unravel_index(i, dims)  # find multiindex of current cell
+        mn = multi + neighbours  # add neighbour offset
         if not torus:
-            cut[i*2*nd:(i+1)*2*nd] = np.sum((mn < 0) + ( mn >= dims), axis=1) # check if boundary is hit
-        mn = np.mod(multi + neighbours, dims) # glue together boundary
-        neighbour_flat = np.ravel_multi_index(mn.T, dims) # back to flat inds
-        #print(neighbour_flat)
+            cut[i*2*nd:(i+1)*2*nd] = np.sum((mn < 0) + (mn >= dims), axis=1)  # check if boundary is hit
+        mn = np.mod(multi + neighbours, dims)  # glue together boundary
+        neighbour_flat = np.ravel_multi_index(mn.T, dims)  # back to flat inds
+        # print(neighbour_flat)
         row[i*2*nd:(i+1)*2*nd] = i
         col[i*2*nd:(i+1)*2*nd] = neighbour_flat
 
-    if not torus: # cut out the points which were glued at boundaries
+    if not torus:  # cut out the points which were glued at boundaries
         sel = ~cut
         data = data[sel]
         row = row[sel]
@@ -85,6 +86,7 @@ class SQRA:
 
     def sqra(self):
         return sqra(self.u.flatten(), self.A, self.beta, self.phi)
+
 
 # conversion between coldness (beta) and epsilon in sde formulation
 # necessary for the computation of phi

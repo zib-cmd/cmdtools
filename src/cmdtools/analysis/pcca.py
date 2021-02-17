@@ -4,6 +4,7 @@ from ..utils import get_pi
 from .schur import ScipySchur
 import warnings
 
+
 class PCCA:
     def __init__(self, T=None, n=None, pi="uniform", massmatrix=None,
                  eigensolver=ScipySchur(), optimizer=Optimizer()):
@@ -27,8 +28,10 @@ class PCCA:
 
         self.chi, self.X, self.A = chi, X, A
 
+
 def pcca(T, n, **kwargs):
     return PCCA(T, n, **kwargs).chi
+
 
 def gramschmidt(X, pi):
     """Gram Schmidt orthogonalization wrt. scalar product induced by pi"""
