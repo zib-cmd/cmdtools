@@ -25,12 +25,14 @@ def parse_which(A, which):
         raise(ValueError("Given matrix is neither P nor Q matrix"))
 
 class KrylovSchur:
-    def __init__(self, onseperation=DEFAULT_ONSEPERATION, which=DEFAULT_WHICH):
+    def __init__(self, onseperation=DEFAULT_ONSEPERATION, which=DEFAULT_WHICH, maxiter=1000, tolerance=1e-6):
         self.onseperation = onseperation
         self.which = which
+        self.maxiter = maxiter
+        self.tolerance = tolerance
 
     def solve(self, A, n, massmatrix=None):
-        return krylovschur(A, n, massmatrix, self.onseperation, self.which)
+        return krylovschur(A, n, massmatrix, self.onseperation, self.which, self.tolerance, self.maxiter)
 
 
 class ScipySchur:
