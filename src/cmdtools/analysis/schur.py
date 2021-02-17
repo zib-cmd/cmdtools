@@ -27,7 +27,7 @@ def parse_which(A, which):
 
 
 class KrylovSchur:
-    def __init__(self, onseperation=DEFAULT_ONSEPERATION, which=DEFAULT_WHICH, maxiter=1000, tolerance=1e-6):
+    def __init__(self, onseperation="continue", which=DEFAULT_WHICH, maxiter=1000, tolerance=1e-6):
         self.onseperation = onseperation
         self.which = which
         self.maxiter = maxiter
