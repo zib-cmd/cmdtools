@@ -21,4 +21,4 @@ This Python library implements a suite of tools used and/or developed in the [Co
 *  `picking_algorithm`: Given a set of datapoints, pick n points such that they are distributed as evenly / equidistant as possible
 *  `sqra`: The Square Root approximation, estimating the generator for the diffusion in a given potential
 *  `voronoi`: Voronoi clustering of trajectories and estimation of the transfer operator with different metrics and center strategies.
-*  `systems`: A collection of dynamical systems (So far the double- and triple-well)
+*  `diffusion`: A collection of dynamical systems (So far the double- and triple-well)

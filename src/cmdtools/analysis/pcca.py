@@ -36,15 +36,13 @@ def pcca(T, n, **kwargs):
 def gramschmidt(X, pi):
     """Gram Schmidt orthogonalization wrt. scalar product induced by pi"""
     X = np.copy(X)
-    D = np.diag(pi)
+    if np.isclose(np.dot(X[:, 0], np.full(np.size(X, 0), 1)), 0):
+        raise RuntimeError("First column is orthogonal to 1-Vector, \
+                            try swapping the columns")
     for i in range(np.size(X, 1)):
         if i == 0:
-            if np.isclose(np.dot(X[:, 0], np.full(np.size(X, 0), 1)), 0):
-                raise RuntimeError("First column is orthogonal to 1-Vector, \
-                                    try swapping the columns")
-            X[:, 0] = 1
+            X[:, 0] = np.sqrt(1 / sum(pi))
         else:
-            for j in range(i):
-                X[:, i] -= X[:, i].dot(D).dot(X[:, j]) * X[:, j]
-            X[:, i] /= np.sqrt(X[:, i].dot(D).dot(X[:, i]))
+            X[:, i] -= X[:, :i] @ (X[:, i]*pi @ X[:, :i])
+            X[:, i] /= np.sqrt((X[:, i]*pi @ X[:, i]))
     return X

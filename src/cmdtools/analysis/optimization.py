@@ -76,8 +76,7 @@ def optimize(X, A, maxiter=1000):
 
 def assertstructure(X, pi):
     Id = np.identity(np.size(X, 1))
-    D = np.diag(pi)
-    XTDX = X.T.dot(D).dot(X)
+    XTDX = (X.T*pi).dot(X)
     assert np.all(np.isclose(X[:, 0], 1))
     assert np.all(np.isclose(XTDX - Id, 0))
 
