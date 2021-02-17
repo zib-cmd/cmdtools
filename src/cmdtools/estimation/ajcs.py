@@ -154,10 +154,11 @@ class AJCS():
             K[:, i] = self.koopman_system_one(i)[0,:]
         return K
 
-    def spacetimecommittor(self, g):
-        """ compute the space-time-committor
-        $$ q = \dagger J q + S g on \Omega
-           q = g on \delta \Omega $$
+    def space_time_committor(self, g):
+        r""" compute the space-time-committor
+        .. math::
+           q = /dagger J q + S g on /Omega
+           q = g on /delta /Omega
 
         Args:
             g ( (nt) x (nx) array): boundary condition, set to np.nan in the interior of Omega
@@ -168,23 +169,22 @@ class AJCS():
         # A = Id - K
         A = -deepcopy(self.k)
         for i in range(nt):
-            for j in range(nt):
-                A += sp.identity(nx)
+                A[i,i] += sp.identity(nx)
 
         b = np.zeros((nt, nx))
         S = self.holding_probs()
 
-        bc_time = np.zeros(nx)
+        bc_time = np.zeros(nx, int)
         bc_vals = np.zeros(nx)
 
         for t in reversed(range(nt)):
-            bc_inds = np.isfinite(g[:,t]) # indices of currently active boundary cond.
+            bc_inds = np.isfinite(g[t,:]) # indices of currently active boundary cond.
             bc_time[bc_inds] = t          # update time of last  active boundary cond.
-            bc_vals[bc_inds] = g[bc_time, bc_time] # and the respective value
+            bc_vals[bc_inds] = g[t, bc_inds] # and the respective value
 
             b[t] = S[t, bc_time, range(nx)] * bc_vals # contribution of staying into the next boundary
 
-            for i in bc_inds: # fix boundary values
+            for i in np.where(bc_inds): # fix boundary values
                 A[t,t][i,:] = 0
                 A[t,t][i,i] = 1
                 b[t,i]      = g[t,i]
