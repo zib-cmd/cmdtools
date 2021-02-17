@@ -73,6 +73,34 @@ class AJCS():
 
         return qt, qi.T
 
+    @staticmethod
+    def jumpkernel2(qt, qi, dt):
+        """ compute the galerkin discretization of the jump kernel eq[50] """
+
+        qi = qi.T
+
+        nt, nx = np.shape(qi)
+        s = np.exp(- dt[:, None] * qi)  # (nt, nx)
+
+        S = np.zeros((nt, nt, nx))  # temporal jump chain
+        J = np.empty((nt, nt), dtype=object)
+
+        for k in range(nt):
+
+            prod = np.vstack((np.ones(nx), np.cumprod(s[k+1:-1,:], axis=0)))
+            if dt[k] > 0:
+                factor = (1 - s[k,:]) / (dt[k] * qi[k])
+            else:  # limit for dt -> 0
+                factor = np.ones(nx)
+
+            S[k, k+1:, :] = factor * (1-s[k+1:,:]) * prod
+            S[k, k, :]    = 1 - factor
+
+        for k in range(nt):
+            for l in range(nt):
+                J[k, l] = sp.diags(S[k, l, :]).dot(qt[l])  # is  csr_scale_rows faster?
+        return J, S
+
     @property
     def km(self):
         if not hasattr(self, "_km"):
