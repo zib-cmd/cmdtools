@@ -13,7 +13,7 @@ from scipy.optimize import minimize
 
 
 class AJCS():
-    """ sparse implementation of the Galerkin discretization to the AJC as in the preprint 
+    """ sparse implementation of the Galerkin discretization to the AJC as in the preprint
     uses the """
 
     def __init__(self, Q, dt):
@@ -28,7 +28,7 @@ class AJCS():
         self.qt, self.qi = self.qtilde(self.Q)
         self.k, self.H, self.S = self.jumpkernel(self.qt, self.qi, self.dt)
 
-    
+
     @staticmethod
     def jumpkernel(qt, qi, dt):
         """ compute the galerkin discretization of the jump kernel eq[50] """
@@ -94,16 +94,16 @@ class AJCS():
 
     def holding_probs(self):
         S = (1 - np.cumsum(self.S, axis=1))
-        S = np.moveaxis(np.triu(np.moveaxis(S, 2, 0)), 0, 2)
+        S = np.moveaxis(np.triu(np.moveaxis(S, 2, 0)), 0, 2) # set entries below (from-to-)diagonal to 0
         return S
 
     def synchronize(self, p):
         return np.einsum('sti, is -> it', self.holding_probs(), p)
 
-    ### SOLVERS FOR THE LINEAR SYSTEM 
+    ### SOLVERS FOR THE LINEAR SYSTEM
 # class AugmentedSolver:
-#     """ methods for solving the augmented linear system 
-#     Ax = b where A is upper triangular block 
+#     """ methods for solving the augmented linear system
+#     Ax = b where A is upper triangular block
 #     where K[i,j] containing the blocks and b[i] the corresponding RHS """
 
 #     def __init__(self, K, holdingprobs):
@@ -153,6 +153,45 @@ class AJCS():
         for i in range(nx):
             K[:, i] = self.koopman_system_one(i)[0,:]
         return K
+
+    def spacetimecommittor(self, g):
+        """ compute the space-time-committor
+        $$ q = \dagger J q + S g on \Omega
+           q = g on \delta \Omega $$
+
+        Args:
+            g ( (nt) x (nx) array): boundary condition, set to np.nan in the interior of Omega
+        """
+
+        nx, nt = self.nx, self.nt
+
+        # A = Id - K
+        A = -deepcopy(self.k)
+        for i in range(nt):
+            for j in range(nt):
+                A += sp.identity(nx)
+
+        b = np.zeros((nt, nx))
+        S = self.holding_probs()
+
+        bc_time = np.zeros(nx)
+        bc_vals = np.zeros(nx)
+
+        for t in reversed(range(nt)):
+            bc_inds = np.isfinite(g[:,t]) # indices of currently active boundary cond.
+            bc_time[bc_inds] = t          # update time of last  active boundary cond.
+            bc_vals[bc_inds] = g[bc_time, bc_time] # and the respective value
+
+            b[t] = S[t, bc_time, range(nx)] * bc_vals # contribution of staying into the next boundary
+
+            for i in bc_inds: # fix boundary values
+                A[t,t][i,:] = 0
+                A[t,t][i,i] = 1
+                b[t,i]      = g[t,i]
+
+        q = self.backwardsolve(A, b)
+        return q
+
 
     def koopman(self):
         return self.koopman_system()
