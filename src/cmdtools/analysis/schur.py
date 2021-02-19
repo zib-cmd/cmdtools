@@ -103,6 +103,7 @@ def krylovschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=
     E = SLEPc.EPS().create()
     E.setOperators(M)
     E.setDimensions(nev=n)
+    E.setConvergenceTest(E.Conv.ABS)
     E.setTolerances(tolerance, maxiter)
     if which == "LR":
         E.setWhichEigenpairs(E.Which.LARGEST_REAL)
