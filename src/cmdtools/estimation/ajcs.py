@@ -185,7 +185,8 @@ class AJCS():
             b[t] = S[t, bc_time, range(nx)] * bc_vals  # contribution of staying into the next boundary
 
             for i in np.where(bc_inds):  # fix boundary values
-                A[t, t][i, :] = 0
+                for tt in range(t, nt):
+                    A[t, tt][i, :] = 0
                 A[t, t][i, i] = 1
                 b[t, i]      = g[t, i]
 
