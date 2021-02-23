@@ -14,7 +14,7 @@ This Python library implements a suite of tools used and/or developed in the [Co
 
 ## Contents
 *  `pcca`: An implementation of (generalized) PCCA⁺ using the Schur decomposition
-*  `ajcs`: A sparse implementation of the augmented jump chain
+*  `ajc`: A sparse implementation of the augmented jump chain
 *  `diffusionmaps`: Diffusionmaps with sparse support and out of sample extensions
 *  `galerkin`: Trajectory based estimation of the transfer operator using a Galerkin projection onto Gaussian RBFs
 *  `gillespie`: Trajectory simulation from a generator
