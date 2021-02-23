@@ -6,13 +6,14 @@ from ..utils import is_generator, is_rowstochastic
 
 # TODO: find a better solution to this
 try:
-    import slepc  # noqa: F401
+    import slepc4py  # noqa: F401
     HAS_SLEPC = True
 except ImportError:
     HAS_SLEPC = False
 
 DEFAULT_WHICH = "auto"
 DEFAULT_ONSEPERATION = "warn"
+
 
 def parse_which(A, which):
     if which != "auto":
@@ -24,13 +25,16 @@ def parse_which(A, which):
     else:
         raise(ValueError("Given matrix is neither P nor Q matrix"))
 
+
 class KrylovSchur:
-    def __init__(self, onseperation=DEFAULT_ONSEPERATION, which=DEFAULT_WHICH):
+    def __init__(self, onseperation="continue", which=DEFAULT_WHICH, maxiter=1000, tolerance=1e-6):
         self.onseperation = onseperation
         self.which = which
+        self.maxiter = maxiter
+        self.tolerance = tolerance
 
     def solve(self, A, n, massmatrix=None):
-        return krylovschur(A, n, massmatrix, self.onseperation, self.which)
+        return krylovschur(A, n, massmatrix, self.onseperation, self.which, self.tolerance, self.maxiter)
 
 
 class ScipySchur:
@@ -99,6 +103,7 @@ def krylovschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=
     E = SLEPc.EPS().create()
     E.setOperators(M)
     E.setDimensions(nev=n)
+    E.setConvergenceTest(E.Conv.ABS)
     E.setTolerances(tolerance, maxiter)
     if which == "LR":
         E.setWhichEigenpairs(E.Which.LARGEST_REAL)
@@ -107,7 +112,8 @@ def krylovschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=
     else:
         raise NotImplementedError("the choice of `which` is not supported")
     E.solve()
-    assert E.getConverged() >= n
+    if E.getConverged() < n:
+        raise RuntimeError("Schur decomposition did not converge, consider more 'maxiter' or a higher 'tolerance'")
     X = np.column_stack([x.array for x in E.getInvariantSubspace()])
     return X[:, :n]
 

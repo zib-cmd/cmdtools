@@ -1,6 +1,7 @@
 import numpy as np
 from . import voronoi
 
+
 def gillespie(Q, x0, n_iter):
     x = x0
     xs = [x]

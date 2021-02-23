@@ -20,5 +20,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=['numpy', 'scipy', 'scikit-learn'],
-    extras_require={'slepc': ['petsc4py', 'slepc4py']}
+    extras_require={'slepc': ['slepc4py'], 'tests':['pytest','pytest-cov','pytest-benchmark']}
 )

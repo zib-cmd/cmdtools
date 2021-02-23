@@ -20,6 +20,7 @@ def test_sqra():
 
     return sqra.sqra(u, A, beta, phi)
 
+
 def test_SQRA():
     u = np.random.rand(10)
     sqra.SQRA(u)

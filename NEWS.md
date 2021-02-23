@@ -1,3 +1,13 @@
+current
+====
+* ajc.py: New augmented jump chain module
+  * Sparse implementation for the computation of the transition kernel, koopman operators and space-time-committors
+* schur.py
+  * allow sensivity and iteration adjustment for the KrylovSchur solver
+  * change tolerance to absolute value
+* pcca.py
+  * fix memory allocation for sparse systems
+
 0.2.1
 =====
 

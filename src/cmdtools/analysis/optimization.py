@@ -67,7 +67,7 @@ def optimize(X, A, maxiter=1000):
     x, _, _, iters, flags = fmin(objective, x0=x, args=(X, A),
                                  maxiter=maxiter, disp=False, full_output=True)
     if flags != 0:
-        warnings.warn("Optimization did not converge")
+        warnings.warn("PCCA+ optimization did not converge, consider more iterations")
     n = np.size(A, axis=1) - 1
     A[1:, 1:] = x.reshape(n, n)
     fillA(A, X)
@@ -76,8 +76,7 @@ def optimize(X, A, maxiter=1000):
 
 def assertstructure(X, pi):
     Id = np.identity(np.size(X, 1))
-    D = np.diag(pi)
-    XTDX = X.T.dot(D).dot(X)
+    XTDX = (X.T*pi).dot(X)
     assert np.all(np.isclose(X[:, 0], 1))
     assert np.all(np.isclose(XTDX - Id, 0))
 

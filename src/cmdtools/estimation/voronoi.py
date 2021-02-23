@@ -111,7 +111,7 @@ def boxtrajinds(traj, lims, ns):
 
     # adjust for points laying at the boundary of the last box
     boxes = np.where(boxes == ns, ns-1, boxes)
-    boxes = boxes.astype(np.int)
+    boxes = boxes.astype(int)
 
     inds = np.ravel_multi_index(boxes.T, ns)
     return inds

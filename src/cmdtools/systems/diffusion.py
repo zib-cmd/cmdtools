@@ -1,6 +1,7 @@
 import numpy as np
 from ..estimation import sqra
 
+
 class AbstractDiffusion:
     def __init__(self, nx, ny, xlims, ylims, beta=1, phi=1):
 
@@ -14,12 +15,14 @@ class AbstractDiffusion:
         self.sqra = sqra.SQRA(self.u, beta=self.beta, phi=self.phi)
         self.Q = self.sqra.Q
 
+
 class DoubleWell(AbstractDiffusion):
     def __init__(self, nx=5, ny=1, xlims=(-2.5, 2.5), ylims=(-1, 1), **kwargs):
         super().__init__(nx=nx, ny=ny, xlims=xlims, ylims=ylims, **kwargs)
 
     def potential(self):
         return (self.xs**2-1)**2 + self.ys**2
+
 
 class TripleWell(AbstractDiffusion):
     def __init__(self, nx=4, ny=3, xlims=(-2, 2), ylims=(-1, 2), **kwargs):
