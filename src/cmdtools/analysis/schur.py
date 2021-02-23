@@ -113,7 +113,7 @@ def krylovschur(A, n, massmatrix=None, onseperation=DEFAULT_ONSEPERATION, which=
         raise NotImplementedError("the choice of `which` is not supported")
     E.solve()
     if E.getConverged() < n:
-        warnings.warn("Schur decomposition did not converge, consider more iterations or less precision")
+        raise RuntimeError("Schur decomposition did not converge, consider more 'maxiter' or a higher 'tolerance'")
     X = np.column_stack([x.array for x in E.getInvariantSubspace()])
     return X[:, :n]
 
