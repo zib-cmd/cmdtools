@@ -6,13 +6,13 @@ with open("README.md", "r", encoding="utf8") as fh:
 
 setuptools.setup(
     name="cmdtools",
-    version="1.0.0",
+    version="1.0.1",
     author="Alexander Sikorski",
     author_email="sikorski@zib.de",
     description="A collection of tools relating to transfer operators",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://git.zib.de/cmd/cmdtools",
+    url="https://github.com/zib-cmd/cmdtools",
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
     classifiers=[
