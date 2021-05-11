@@ -1,5 +1,6 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/zib-cmd/cmdtools/HEAD?filepath=examples)
-[![Documentation Status](https://readthedocs.org/projects/cmdtools/badge/?version=latest)](https://cmdtools.readthedocs.io/en/latest/?badge=latest)
+[![Documentation](https://readthedocs.org/projects/cmdtools/badge/?version=latest)](https://cmdtools.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4749330.svg)](https://doi.org/10.5281/zenodo.4749330)
 
 # cmdtools
 
@@ -22,3 +23,6 @@ Install with `pip install cmdtools`
 *  `sqra`: The Square Root approximation, estimating the generator for the diffusion in a given potential
 *  `voronoi`: Voronoi clustering of trajectories and estimation of the transfer operator with different metrics and center strategies.
 *  `diffusion`: A collection of dynamical systems (So far the double- and triple-well)
+
+
+If you use cmdtools in your research, please [cite](CITATION.bib) our work.
