@@ -12,6 +12,8 @@ This Python library implements a suite of tools used and/or developed in the [Co
 Install with `pip install cmdtools`
     (If you want to use the SLEPc library for sparse Schur decompositions install cmdtools with the extra slepc, i.e. `pip install "cmdtools[slepc]"`)
 
+Note: It seems that `pip` has problems installing SLEPc. However, using conda you can install it with `conda install -c conda-forge petsc slepc petsc4py slepc4py`.
+
 ## Contents
 *  `pcca`: An implementation of (generalized) PCCA⁺ using the Schur decomposition
 *  `ajc`: A sparse implementation of the augmented jump chain
