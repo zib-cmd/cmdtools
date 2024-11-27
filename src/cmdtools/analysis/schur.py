@@ -25,6 +25,15 @@ def parse_which(A, which):
     else:
         raise(ValueError("Given matrix is neither P nor Q matrix"))
 
+class Eigenvectors:
+    """ A class used to precomputed Eigenvectors. """
+    def __init__(self, X):
+        self.X = X
+
+    def solve(self, A, n, massmatrix=None):
+        assert massmatrix is None
+        return self.X[:, 0:n]
+
 
 class KrylovSchur:
     def __init__(self, onseperation="continue", which=DEFAULT_WHICH, maxiter=1000, tolerance=1e-6):

@@ -1,20 +1,24 @@
 import numpy as np
 from .optimization import Optimizer
 from ..utils import get_pi
-from .schur import ScipySchur
+from .schur import ScipySchur, Eigenvectors
 import warnings
 
 
 class PCCA:
     def __init__(self, T=None, n=None, pi="uniform", massmatrix=None,
-                 eigensolver=ScipySchur(), optimizer=Optimizer()):
+                 eigensolver=ScipySchur(), optimizer=Optimizer(), eigenvectors=None):
+        if eigenvectors is not None:  # hacky way to insert precomputed eigenvectors
+            pi = get_pi(eigenvectors, pi)
+            eigensolver = Eigenvectors(eigenvectors)
+
         self.T = T
         self.n = n
         self.pi = get_pi(T, pi)
         self.massmatrix = massmatrix
         self.eigensolver = eigensolver
         self.optimizer = optimizer
-        if T is not None:
+        if T is not None or eigenvectors is not None:
             self.solve()
 
     def solve(self):

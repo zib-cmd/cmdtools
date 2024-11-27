@@ -27,3 +27,8 @@ def test_example_n3():
     m = utils.order_membership(m)
     expected = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 1]]
     assert np.isclose(m, expected).all()
+
+def test_predefined_eigenvectors():
+    X = np.random.rand(10,3)
+    X[:,0] = 1
+    pcca.PCCA(eigenvectors=X, n=2)

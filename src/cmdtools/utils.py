@@ -9,10 +9,10 @@ def randompropagator(n, reversible=True):
 
 
 def get_pi(T, pi="uniform"):
-    if pi == "uniform":
-        dim = np.size(T, 1)
+    if isinstance(pi, str) and pi == "uniform":
+        dim = np.size(T, 0)
         pi = np.full(dim, 1./dim)
-    elif pi == "auto":
+    elif isinstance(pi, str) and pi == "auto":
         raise NotImplementedError  # TODO Eigenvector to EV 1
     assert np.isclose(np.sum(pi), 1)
     return pi
