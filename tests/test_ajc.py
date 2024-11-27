@@ -1,7 +1,7 @@
 from cmdtools.systems import diffusion
 from cmdtools.estimation import ajc
 import numpy as np
-from scipy.linalg import expm
+from scipy.sparse.linalg import expm
 
 
 def test_ajc(n=20, tol=1e-2):

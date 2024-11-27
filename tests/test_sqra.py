@@ -18,7 +18,7 @@ def test_sqra():
     A = np.diag(np.ones(grids), k=1)
     A = A + A.T
 
-    return sqra.sqra(u, A, beta, phi)
+    sqra.sqra(u, A, beta, phi)
 
 
 def test_SQRA():

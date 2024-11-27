@@ -25,4 +25,4 @@ def test_Newton():
 
         applied_Newton[i] = Newton_N(tensor, 1., i)
 
-    assert np.alltrue(np.round(diff_tensor, 5) == np.round(applied_Newton, 5))
+    assert np.all(np.round(diff_tensor, 5) == np.round(applied_Newton, 5))

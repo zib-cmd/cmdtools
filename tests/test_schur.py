@@ -1,6 +1,6 @@
 from cmdtools import utils, schur, sqra, diffusion
 import numpy as np
-from scipy.linalg import expm
+from scipy.sparse.linalg import expm
 import pytest
 
 N_BENCHMARK = 2000
